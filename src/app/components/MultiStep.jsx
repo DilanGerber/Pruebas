@@ -1,7 +1,12 @@
 "use client"
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
+import { StepperContext } from '@/contexts/StepperContext'
 
-const MultiStep = ({ steps, currentStep}) => {
+const MultiStep = ({ steps, currentStep }) => {
+
+    const { state } = useContext(StepperContext)
+    const { stepsCompleted } = state
+
     const [newStep, setNewStep] = useState([])
     const stepRef = useRef()
 
@@ -16,7 +21,7 @@ const MultiStep = ({ steps, currentStep}) => {
                     ...newSteps[count],
                     highlighted: true,
                     selected: true,
-                    completed: true
+                    completed: stepsCompleted[steps[count]]
                 }
                 count++
             } else if(count < stepNumber){
@@ -56,7 +61,7 @@ const MultiStep = ({ steps, currentStep}) => {
         const current = updateStep(currentStep - 1, stepRef.current)
         setNewStep(current)
 
-    }, [steps, currentStep])
+    }, [steps, currentStep, stepsCompleted])
 
     const displaySteps = newStep.map((step, index) => {
         return (
