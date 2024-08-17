@@ -1,8 +1,11 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
+import { StepperContext } from '@/contexts/StepperContext'
 import SpinnerIcon from '../icons/SpinnerIcon'
 
 const PaymentButton = ({ isNextDisabled  = () => true }) => {
+
+    const { dispatch } = useContext(StepperContext);
     
     const [isLoading, setIsLoading] = useState(false);
 
@@ -10,6 +13,12 @@ const PaymentButton = ({ isNextDisabled  = () => true }) => {
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
+            const isSuccess = Math.random() > 0.5;
+            if (isSuccess) {
+                dispatch({ type: 'CHECKOUT_SUCCESS' });
+            } else {
+                dispatch({ type: 'CHECKOUT_ERROR' });
+            }
         }, 3000);
     }
  

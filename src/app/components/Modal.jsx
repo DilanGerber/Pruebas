@@ -8,6 +8,8 @@ import Form from './steps/Form'
 import Payment from './steps/Payment'
 import { StepperContext } from '@/contexts/StepperContext'
 import IconBack from './icons/IconBack'
+import CheckoutSuccess from './uiPayment/CheckoutSuccess'
+import CheckoutError from './uiPayment/CheckoutError'
 
 
 const Modal = () => {
@@ -42,6 +44,24 @@ const Modal = () => {
         }
     }
 
+    const displayContent = () => {
+        if (state.checkoutStatus === 'success') {
+            return <CheckoutSuccess />;
+        } else if (state.checkoutStatus === 'error') {
+            return <CheckoutError />;
+        } else {
+            return (
+                <>
+                    <MultiStep steps={steps} currentStep={state.currentStep}/> 
+                    <div className='my-5 sm:my-10 p-5 sm:p-10'>
+                        {displayStep(state.currentStep)}
+                    </div>
+                    <SteperControl steps={steps} currentStep={state.currentStep} />
+                </>
+            );
+        }
+    };
+
   return (
     <div className='my-4 sm:my-8 px-4'>
         <div className='relative max-w-[1100px] w-full sm:w-4/5 m-auto flex flex-row justify-between items-start gap-4 sm:gap-8'>
@@ -56,12 +76,8 @@ const Modal = () => {
                     <StepperContext.Provider value={{ state, dispatch }}>
                         <div className=' container mx-auto shadow-lg  rounded-2xl py-2 sm:pt-5 '>
                             <div className=' container horizontal mt-5'>
-                                <MultiStep steps={steps} currentStep={state.currentStep}/> 
-                                <div className=' my-5 sm:my-10 p-5 sm:p-10'>
-                                    {displayStep(state.currentStep)}
-                                </div>
+                                {displayContent()}
                             </div>
-                            <SteperControl steps={steps} currentStep={state.currentStep} />
                         </div>
                     </StepperContext.Provider>
                 </div>

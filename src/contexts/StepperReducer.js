@@ -8,6 +8,7 @@ export const initialState = {
         payment: false,
     },
     currentStep: 1,
+    checkoutStatus: null,
 }
 
 export const stepperReducer = (state = initialState, action) => {
@@ -36,9 +37,19 @@ export const stepperReducer = (state = initialState, action) => {
             },
           };
         case 'SET_CURRENT_STEP':
+          return {
+            ...state,
+            currentStep: action.step,
+          };
+        case 'CHECKOUT_SUCCESS':
             return {
-                ...state,
-                currentStep: action.step,
+              ...state,
+              checkoutStatus: 'success',
+            };
+        case 'CHECKOUT_ERROR':
+            return {
+              ...state,
+              checkoutStatus: 'error',
             };
         default:
             return state;
