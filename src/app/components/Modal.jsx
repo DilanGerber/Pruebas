@@ -46,9 +46,19 @@ const Modal = () => {
 
     const displayContent = () => {
         if (state.checkoutStatus === 'success') {
-            return <CheckoutSuccess />;
+            return (
+                <>
+                    <MultiStep steps={steps} currentStep={state.currentStep} completedSteps={true} />
+                    <CheckoutSuccess />
+                </>
+            );
         } else if (state.checkoutStatus === 'error') {
-            return <CheckoutError />;
+            return (
+                <>
+                    <MultiStep steps={steps} currentStep={state.currentStep} />
+                    <CheckoutError />
+                </>
+            );
         } else {
             return (
                 <>
@@ -56,7 +66,7 @@ const Modal = () => {
                     <div className='my-5 sm:my-10 p-5 sm:p-10'>
                         {displayStep(state.currentStep)}
                     </div>
-                    <SteperControl steps={steps} currentStep={state.currentStep} />
+                    <SteperControl steps={steps} currentStep={state.currentStep} dispatch={dispatch} />
                 </>
             );
         }

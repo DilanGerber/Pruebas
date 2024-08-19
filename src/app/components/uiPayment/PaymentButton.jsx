@@ -24,12 +24,12 @@ const PaymentButton = ({ isNextDisabled  = () => true }) => {
  
     return (
         <button 
-        className={`flex items-center py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
-            isLoading ? 'bg-gray-500 text-gray-300 hover:bg-gray-500 cursor-not-allowed' 
-            : 'bg-red-600 text-white '
-        } ${isNextDisabled() ? "opacity-50 cursor-not-allowed" : " hover:bg-red-700 "}`}
+            className={`flex items-center py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
+                isLoading ? 'bg-gray-500 text-gray-300 hover:bg-gray-500 cursor-not-allowed' 
+                : 'bg-red-600 text-white hover:bg-red-700 '
+            } ${isNextDisabled() ? "opacity-50 cursor-not-allowed" : "  "}`}
             onClick={handlerClickPayment}
-            disabled={isLoading || isNextDisabled()}
+            disabled={isLoading || isNextDisabled() }
         >
             {isLoading ? (
                 <>

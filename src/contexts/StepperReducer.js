@@ -40,6 +40,7 @@ export const stepperReducer = (state = initialState, action) => {
           return {
             ...state,
             currentStep: action.step,
+            checkoutStatus: null
           };
         case 'CHECKOUT_SUCCESS':
             return {
@@ -50,6 +51,12 @@ export const stepperReducer = (state = initialState, action) => {
             return {
               ...state,
               checkoutStatus: 'error',
+            };
+        case 'RETRY_CHECKOUT':
+          return {
+              ...state,
+              currentStep: 3,
+              checkoutStatus: null 
             };
         default:
             return state;
