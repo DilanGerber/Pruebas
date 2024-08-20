@@ -9,14 +9,22 @@ const MultiStep = ({ steps }) => {
     const [newStep, setNewStep] = useState([])
 
     const updateStep = (stepNumber) => {
-        // Actualiza el estado de los pasos basados en el paso actual
-        return steps.map((step, index) => ({
-            description: step,
-            highlighted: index === stepNumber,
-            selected: index <= stepNumber,
-            completed: index < stepNumber ? true : stepsCompleted[step] || false,
-        }))
-    }
+        return steps.map((step, index) => {
+            let isCompleted = stepsCompleted[step] || index < stepNumber;
+    
+            // Marcar el último paso como completado en caso de éxito
+            if (state.checkoutStatus === 'success' && index === steps.length - 1) {
+                isCompleted = true;
+            }
+    
+            return {
+                description: step,
+                highlighted: index === stepNumber,
+                selected: index <= stepNumber,
+                completed: isCompleted,
+            };
+        });
+    };
 
     useEffect(() => {
         // Actualiza los pasos solo si currentStep cambia
@@ -32,7 +40,7 @@ const MultiStep = ({ steps }) => {
         <div className='mx-4 p-2 sm:p-4 flex justify-between items-center'>
             {newStep.map((step, index) => (
                 <div key={index} className={index !== newStep.length - 1 ? 'w-full flex items-center' : 'flex items-center'}>
-                    <div className='relative flex flex-col items-center text-teal-600'>
+                    <div className='relative flex flex-col items-center text-gray-400'>
                         <div className={`rounded-full transition duration-500 ease-in-out border-2 border-gray-300 h-8 sm:h-12 w-8 sm:w-12 flex items-center justify-center py-3 ${step.selected ? 'bg-red-600 text-white font-bold border border-red-600' : ''}`}>
                             {step.completed ? (
                                 <span className='text-white text-xl font-bold'>&#10003;</span>

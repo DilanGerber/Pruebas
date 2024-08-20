@@ -45,6 +45,10 @@ export const stepperReducer = (state = initialState, action) => {
         case 'CHECKOUT_SUCCESS':
             return {
               ...state,
+              stepsCompleted: {
+                ...state.stepsCompleted,
+                payment: true // Marca el paso de Payment como completado
+            },
               checkoutStatus: 'success',
             };
         case 'CHECKOUT_ERROR':

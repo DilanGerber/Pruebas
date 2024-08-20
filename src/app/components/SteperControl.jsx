@@ -36,8 +36,8 @@ const SteperControl = ({ steps }) => {
         <div className='container flex justify-around mt-2 mb-4 sm:mt-4 sm:mb-8'>
             <button
                 onClick={handleBackClick}
-                className={`bg-white text-slate-400 uppercase py-1.5 sm:py-2 px-4 rounded-lg font-semibold border-2 border-slate-300 transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
-                    currentStep === 1 ? "  opacity-50 cursor-not-allowed" : "hover:bg-slate-700 hover:text-white cursor-pointer"
+                className={`bg-gray-300 text-black  py-1.5 sm:py-2 px-4 rounded-lg font-semibold  transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
+                    currentStep === 1 ? "  opacity-50 cursor-not-allowed" : "hover:bg-gray-400 hover:text-black cursor-pointer"
                 }`}
                 disabled={currentStep === 1}
             >
@@ -47,7 +47,7 @@ const SteperControl = ({ steps }) => {
             {currentStep === steps.length ? ( <PaymentButton isNextDisabled={isNextDisabled} /> ) : (
                 <button
                     onClick={handleNextClick}
-                    className={`bg-red-600 text-white uppercase py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
+                    className={`bg-red-600 text-white  py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
                         isNextDisabled() ? "opacity-50 cursor-not-allowed" : "hover:bg-red-700 hover:text-white cursor-pointer"
                     }`}
                     disabled={isNextDisabled()}
