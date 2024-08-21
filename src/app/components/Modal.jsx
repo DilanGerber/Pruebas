@@ -49,14 +49,18 @@ const Modal = () => {
             return (
                 <>
                     <MultiStep steps={steps} currentStep={state.currentStep} completedSteps={true} />
-                    <CheckoutSuccess />
+                    <div className=' flex items-center justify-center'>
+                        <CheckoutSuccess />
+                    </div>
                 </>
             );
         } else if (state.checkoutStatus === 'error') {
             return (
                 <>
                     <MultiStep steps={steps} currentStep={state.currentStep} />
-                    <CheckoutError />
+                    <div className=' flex items-center justify-center'>
+                        <CheckoutError />
+                    </div>
                 </>
             );
         } else {
