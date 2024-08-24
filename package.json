@@ -11,6 +11,7 @@
   "dependencies": {
     "@ant-design/icons": "5.3.5",
     "antd": "5.15.4",
+    "cally": "^0.7.1",
     "dayjs": "1.11.10",
     "next": "14.1.4",
     "react": "^18",
