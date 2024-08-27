@@ -47,7 +47,7 @@ const SteperControl = ({ steps }) => {
             {currentStep === steps.length ? ( <PaymentButton isNextDisabled={isNextDisabled} /> ) : (
                 <button
                     onClick={handleNextClick}
-                    className={`bg-red-500 text-white  py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
+                    className={`bg-red-600 text-white  py-1.5 sm:py-2 px-4 rounded-lg font-semibold transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${
                         isNextDisabled() ? "opacity-50 cursor-not-allowed" : "hover:bg-red-700 hover:text-white cursor-pointer"
                     }`}
                     disabled={isNextDisabled()}
