@@ -53,7 +53,7 @@ const MultiStep = ({ steps }) => {
                         </div>
                     </div>
                     {index < newStep.length - 1 && (
-                        <div className={`flex-auto border-t-2 transition duration-500 ease-in-out ${step.completed ? 'border-red-600' : 'border-gray-300'}`}></div>
+                        <div className={`flex-auto border-t-2 transition duration-500 ease-in-out ${step.completed ? 'border-red-500' : 'border-gray-300'}`}></div>
                     )}
                 </div>
             ))}

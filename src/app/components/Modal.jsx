@@ -10,6 +10,7 @@ import { StepperContext } from '@/contexts/StepperContext'
 import IconBack from './icons/IconBack'
 import CheckoutSuccess from './uiPayment/CheckoutSuccess'
 import CheckoutError from './uiPayment/CheckoutError'
+import Calendario from './steps/Calendar'
 
 
 const Modal = () => {
@@ -35,7 +36,7 @@ const Modal = () => {
     const displayStep = (step) => {
         switch(step) {
             case 1:
-                return <Calendar/>
+                return <Calendario/>
             case 2:
                 return <Form/>
             case 3: 
