@@ -1,8 +1,9 @@
 "use client"
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { StepperContext } from '@/contexts/StepperContext';
 
 import { Calendar } from "../../../components/ui/calendar"
+import { it } from 'date-fns/locale';
 
 const Calendario = () => {
     const { state, dispatch } = useContext(StepperContext);
@@ -23,8 +24,57 @@ const Calendario = () => {
             dispatch({ type: 'COMPLETE_STEP', step: 'calendar' });
         }
     };
+    // APARTIR DE ACA ES EL COMPONENTE REAL
+    const [numberOfMonths, setNumberOfMonths] = useState(1);
 
     const [date, setDate] = useState(new Date);
+    const [timeSlot, setTimeSlot] = useState()
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState()
+
+    const getTime = () => {
+      const timeList = []
+      for(let i = 8; i<= 12; i++) {
+        timeList.push({
+          time: i + ':00 AM'
+        })
+      }
+      for(let i = 1; i<= 8; i++) {
+        timeList.push({
+          time: i + ':00 PM'
+        })
+      }
+      setTimeSlot(timeList)
+    }
+
+    const isPastDay = (day) => {
+      return day <= new Date()
+    }
+
+    useEffect(()=>{
+      getTime()
+    }, [])
+
+  useEffect(() => {
+    // Función para actualizar el número de calendarios según el ancho de la ventana
+    const updateNumberOfMonths = () => {
+      if (window.innerWidth >= 768) {
+        setNumberOfMonths(2); // Pantallas grandes, muestra 2 calendarios
+      } else {
+        setNumberOfMonths(1); // Pantallas pequeñas, muestra 1 calendario
+      }
+    };
+
+    // Llama a la función cuando el componente se monta
+    updateNumberOfMonths();
+
+    // Agrega un event listener para manejar cambios en el tamaño de la ventana
+    window.addEventListener("resize", updateNumberOfMonths);
+
+    // Limpia el event listener cuando el componente se desmonta
+    return () => {
+      window.removeEventListener("resize", updateNumberOfMonths);
+    };
+  }, []);
 
     return (<>
         <div className='flex flex-col'>
@@ -45,15 +95,26 @@ const Calendario = () => {
                 </div>
             </div>
         </div>
-        <div className=' flex items-center justify-center'>
-        <Calendar
-          numberOfMonths={2}
-          mode="range"
-          selected={date}
-          onSelect={setDate}
-          className="rounded-md border"
-        />
-    
+        <div className=' flex grid-flow-row gap-10'>
+          <div className=' flex items-center justify-center'>
+            <Calendar
+              numberOfMonths={numberOfMonths}
+              mode="range"
+              selected={date}
+              onSelect={setDate}
+              disabled={isPastDay}
+              className="rounded-md border"
+            />
+          </div>
+          <div> 
+            <div className=' grid grid-cols-2 gap-x-4 gap-y-1.5'>
+              {timeSlot?.map((item, index)=>(
+                <h2
+                  onClick={()=>setSelectedTimeSlot(item.time)}
+                  className={`py-2 px-4 text-center border rounded-full cursor-pointer hover:bg-red-600 hover:text-white ${item.time === selectedTimeSlot && 'bg-red-600 text-white'}`}>{item.time}</h2>
+              ))}
+            </div>
+          </div>
         </div>
     </>);
 };
