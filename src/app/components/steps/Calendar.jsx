@@ -43,6 +43,9 @@ const Calendario = () => {
           time: i + ':00 PM'
         })
       }
+      timeList.push({
+        time:'Todo el Día'
+      })
       setTimeSlot(timeList)
     }
 
