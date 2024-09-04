@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { StepperContext } from '@/contexts/StepperContext';
 
 import { Calendar } from "../../../components/ui/calendar"
+import { format } from 'date-fns';
 
 const Calendario = () => {
   const [numberOfMonths, setNumberOfMonths] = useState(1);
@@ -11,7 +12,6 @@ const Calendario = () => {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState([]);
   const [blockedTimeSlots, setBlockedTimeSlots] = useState({});
 
-  // Función para obtener las reservas desde el backend
   const fetchReservations = async () => {
     try {
       const response = await fetch(`https://cowork-backend.up.railway.app/reservations/office/66ada0c79717df74ab14d493`);
@@ -24,7 +24,6 @@ const Calendario = () => {
           acc[dateKey] = [];
         }
 
-        // Si está reservado todo el día, bloquea el día completo
         if (reservation.timeSlots.includes("Todo el Día")) {
           acc[dateKey] = ["Todo el Día"];
         } else {
@@ -44,7 +43,6 @@ const Calendario = () => {
     fetchReservations();
   }, []);
 
-  // Generar la lista de horarios
   const getTime = () => {
     const timeList = [];
     for (let i = 8; i <= 12; i++) {
@@ -72,18 +70,17 @@ const Calendario = () => {
   const isBlockedDay = (day) => {
     const dayString = day.toISOString().split('T')[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
-    return blockedTimes.includes("Todo el Día") || blockedTimes.length >= 13; // 12 horarios + "Todo el Día"
+    return blockedTimes.includes("Todo el Día") || blockedTimes.length >= 13;
   };
 
   const isBlockedTimeSlot = (day, time) => {
-    const dayString = day.toISOString().split('T')[0];
+    const dayString = day?.toISOString().split('T')[0];
     return blockedTimeSlots[dayString]?.includes(time);
   };
 
   const isFullDayDisabled = (day) => {
-    const dayString = day.toISOString().split('T')[0];
+    const dayString = day?.toISOString().split('T')[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
-    // Deshabilitar "Todo el Día" si ya hay alguna hora reservada en ese día
     return blockedTimes.length > 0 && !blockedTimes.includes("Todo el Día");
   };
 
@@ -110,34 +107,42 @@ const Calendario = () => {
 
   const handleDateChange = (newRange) => {
     setRange(newRange);
-    setSelectedTimeSlots([]); // Resetear la selección de horas al cambiar la fecha
+    setSelectedTimeSlots([]); // Reiniciar la selección de horarios al cambiar la fecha
   };
 
   const handleTimeSlotClick = (time) => {
     const dayString = range?.from?.toISOString().split('T')[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
 
-    // Prevenir selección de "Todo el Día" si hay horas reservadas
     if (time === "Todo el Día" && blockedTimes.length > 0) {
       return;
     }
 
-    // Si se selecciona "Todo el Día"
     if (time === "Todo el Día") {
-      setSelectedTimeSlots(["Todo el Día"]); // Solo se selecciona "Todo el Día"
+      setSelectedTimeSlots(["Todo el Día"]);
     } else {
-      // Si "Todo el Día" está seleccionado, deseleccionarlo primero
-      if (selectedTimeSlots.includes("Todo el Día")) {
-        setSelectedTimeSlots([time]);
-      } else {
-        // Toggle para agregar o eliminar horarios seleccionados
-        setSelectedTimeSlots((prevSelected) =>
-          prevSelected.includes(time)
-            ? prevSelected.filter((t) => t !== time)
-            : [...prevSelected, time]
-        );
-      }
+      setSelectedTimeSlots((prevSelected) => {
+        // Si "Todo el Día" está seleccionado, deseleccionamos todo
+        if (prevSelected.includes("Todo el Día")) {
+          return [time];
+        }
+
+        // Alternar la selección de horarios individuales
+        if (prevSelected.includes(time)) {
+          return prevSelected.filter((t) => t !== time);
+        } else {
+          return [...prevSelected, time];
+        }
+      });
     }
+  };
+
+  // Formatear la fecha seleccionada o el rango de fechas
+  const formatDate = (from, to) => {
+    if (to) {
+      return `${format(new Date(from), "PPP")} hasta ${format(new Date(to), "PPP")}`;
+    }
+    return format(new Date(from), "PPP");
   };
 
   return (
@@ -171,6 +176,21 @@ const Calendario = () => {
                 {item.time}
               </h2>
             ))}
+          </div>
+        )}
+
+        {/* Sección de detalle de reserva */}
+        {range?.from && selectedTimeSlots.length > 0 && (
+          <div className="mt-8 p-4 border rounded-lg bg-gray-100">
+            <h3 className="text-lg font-semibold">Detalle de la Reserva</h3>
+            <p className="mt-2">
+              <strong>Fecha:</strong>{" "}
+                {formatDate(range.from, range.to)}
+            </p>
+            <p className="mt-2">
+              <strong>Horarios seleccionados:</strong>{" "}
+                {selectedTimeSlots}
+            </p>
           </div>
         )}
       </div>
