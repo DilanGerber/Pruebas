@@ -14,28 +14,32 @@ const Calendario = () => {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch(`https://cowork-backend.up.railway.app/reservations/office/66ada0c79717df74ab14d493`);
+      const response = await fetch(
+        `https://cowork-backend.up.railway.app/reservations/office/66ada0c79717df74ab14d493`
+      );
       const data = await response.json();
 
       const timeSlots = data.reduce((acc, reservation) => {
-        const dateKey = new Date(reservation.date[0]).toISOString().split('T')[0];
+        reservation.dates.forEach(({ date, timeSlots }) => {
+          const dateKey = new Date(date).toISOString().split("T")[0];
 
-        if (!acc[dateKey]) {
-          acc[dateKey] = [];
-        }
+          if (!acc[dateKey]) {
+            acc[dateKey] = [];
+          }
 
-        if (reservation.timeSlots.includes("Todo el Día")) {
-          acc[dateKey] = ["Todo el Día"];
-        } else {
-          acc[dateKey].push(...reservation.timeSlots);
-        }
+          if (timeSlots.includes("Todo el Día")) {
+            acc[dateKey] = ["Todo el Día"];
+          } else {
+            acc[dateKey].push(...timeSlots);
+          }
+        });
 
         return acc;
       }, {});
 
       setBlockedTimeSlots(timeSlots);
     } catch (error) {
-      console.error('Error fetching reservations:', error);
+      console.error("Error fetching reservations:", error);
     }
   };
 
@@ -46,12 +50,12 @@ const Calendario = () => {
   const getTime = () => {
     const timeList = [];
     for (let i = 8; i <= 12; i++) {
-      timeList.push({ time: i + ':00 AM' });
+      timeList.push({ time: i + ":00 AM" });
     }
     for (let i = 1; i <= 8; i++) {
-      timeList.push({ time: i + ':00 PM' });
+      timeList.push({ time: i + ":00 PM" });
     }
-    timeList.push({ time: 'Todo el Día' });
+    timeList.push({ time: "Todo el Día" });
     setTimeSlot(timeList);
   };
 
@@ -68,18 +72,18 @@ const Calendario = () => {
   };
 
   const isBlockedDay = (day) => {
-    const dayString = day.toISOString().split('T')[0];
+    const dayString = day.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
     return blockedTimes.includes("Todo el Día") || blockedTimes.length >= 13;
   };
 
   const isBlockedTimeSlot = (day, time) => {
-    const dayString = day?.toISOString().split('T')[0];
+    const dayString = day?.toISOString().split("T")[0];
     return blockedTimeSlots[dayString]?.includes(time);
   };
 
   const isFullDayDisabled = (day) => {
-    const dayString = day?.toISOString().split('T')[0];
+    const dayString = day?.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
     return blockedTimes.length > 0 && !blockedTimes.includes("Todo el Día");
   };
@@ -98,10 +102,10 @@ const Calendario = () => {
     };
 
     updateNumberOfMonths();
-    window.addEventListener('resize', updateNumberOfMonths);
+    window.addEventListener("resize", updateNumberOfMonths);
 
     return () => {
-      window.removeEventListener('resize', updateNumberOfMonths);
+      window.removeEventListener("resize", updateNumberOfMonths);
     };
   }, []);
 
@@ -111,7 +115,7 @@ const Calendario = () => {
   };
 
   const handleTimeSlotClick = (time) => {
-    const dayString = range?.from?.toISOString().split('T')[0];
+    const dayString = range?.from?.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
 
     if (time === "Todo el Día" && blockedTimes.length > 0) {
@@ -168,9 +172,9 @@ const Calendario = () => {
                   handleTimeSlotClick(item.time)
                 }
                 className={`py-2 px-4 text-center border rounded-full cursor-pointer 
-              ${isBlockedTimeSlot(range.from, item.time) || (item.time === 'Todo el Día' && isFullDayDisabled(range.from)) ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-red-600 hover:text-white'} 
+              ${isBlockedTimeSlot(range.from, item.time) || (item.time === "Todo el Día" && isFullDayDisabled(range.from)) ? "bg-gray-400 cursor-not-allowed" : "hover:bg-red-600 hover:text-white"} 
               ${
-                selectedTimeSlots.includes(item.time) && 'bg-red-600 text-white'
+                selectedTimeSlots.includes(item.time) && "bg-red-600 text-white"
               }`}
               >
                 {item.time}
@@ -184,16 +188,15 @@ const Calendario = () => {
           <div className="mt-8 p-4 border rounded-lg bg-gray-100">
             <h3 className="text-lg font-semibold">Detalle de la Reserva</h3>
             <p className="mt-2">
-              <strong>Fecha:</strong>{" "}
-                {formatDate(range.from, range.to)}
+              <strong>Fecha:</strong> {formatDate(range.from, range.to)}
             </p>
             <p className="mt-2">
-              <strong>Horarios seleccionados:</strong>{" "}
-                {selectedTimeSlots}
+              <strong>Horarios seleccionados:</strong> {selectedTimeSlots.join(", ")}
             </p>
           </div>
         )}
       </div>
+      {console.log(range, selectedTimeSlots)}
     </div>
   );
 };
