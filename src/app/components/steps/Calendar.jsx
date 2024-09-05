@@ -3,7 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { StepperContext } from '@/contexts/StepperContext';
 
 import { Calendar } from "../../../components/ui/calendar"
-import { format } from 'date-fns';
+import { format, eachDayOfInterval } from 'date-fns';
 
 const Calendario = () => {
   const [numberOfMonths, setNumberOfMonths] = useState(1);
@@ -59,6 +59,10 @@ const Calendario = () => {
     setTimeSlot(timeList);
   };
 
+  useEffect(() => {
+    getTime();
+  }, []);
+
   const isPastDay = (day) => {
     const now = new Date();
     const selectedDate = new Date(day);
@@ -89,10 +93,6 @@ const Calendario = () => {
   };
 
   useEffect(() => {
-    getTime();
-  }, []);
-
-  useEffect(() => {
     const updateNumberOfMonths = () => {
       if (window.innerWidth >= 768) {
         setNumberOfMonths(2);
@@ -114,31 +114,38 @@ const Calendario = () => {
     setSelectedTimeSlots([]); // Reiniciar la selección de horarios al cambiar la fecha
   };
 
-  const handleTimeSlotClick = (time) => {
-    const dayString = range?.from?.toISOString().split("T")[0];
+  const handleTimeSlotClick = (day, time) => {
+    const dayString = day.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
 
     if (time === "Todo el Día" && blockedTimes.length > 0) {
       return;
     }
 
-    if (time === "Todo el Día") {
-      setSelectedTimeSlots(["Todo el Día"]);
-    } else {
-      setSelectedTimeSlots((prevSelected) => {
-        // Si "Todo el Día" está seleccionado, deseleccionamos todo
-        if (prevSelected.includes("Todo el Día")) {
-          return [time];
-        }
+    setSelectedTimeSlots((prevSelected) => {
+      const daySelectedTimes = prevSelected.find((item) => item.day === dayString)?.times || [];
 
+      if (time === "Todo el Día") {
+        return [
+          ...prevSelected.filter((item) => item.day !== dayString),
+          { day: dayString, times: ["Todo el Día"] },
+        ];
+      } else {
         // Alternar la selección de horarios individuales
-        if (prevSelected.includes(time)) {
-          return prevSelected.filter((t) => t !== time);
+        const newSelectedTimes = daySelectedTimes.includes(time)
+          ? daySelectedTimes.filter((t) => t !== time)
+          : [...daySelectedTimes, time];
+
+        if (newSelectedTimes.length === 0) {
+          return prevSelected.filter((item) => item.day !== dayString);
         } else {
-          return [...prevSelected, time];
+          return [
+            ...prevSelected.filter((item) => item.day !== dayString),
+            { day: dayString, times: newSelectedTimes },
+          ];
         }
-      });
-    }
+      }
+    });
   };
 
   // Formatear la fecha seleccionada o el rango de fechas
@@ -164,21 +171,26 @@ const Calendario = () => {
       <div>
         {range?.from && (
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {timeSlot?.map((item, index) => (
-              <h2
-                key={index}
-                onClick={() =>
-                  !isBlockedTimeSlot(range.from, item.time) &&
-                  handleTimeSlotClick(item.time)
-                }
-                className={`py-2 px-4 text-center border rounded-full cursor-pointer 
-              ${isBlockedTimeSlot(range.from, item.time) || (item.time === "Todo el Día" && isFullDayDisabled(range.from)) ? "bg-gray-400 cursor-not-allowed" : "hover:bg-red-600 hover:text-white"} 
-              ${
-                selectedTimeSlots.includes(item.time) && "bg-red-600 text-white"
-              }`}
-              >
-                {item.time}
-              </h2>
+            {eachDayOfInterval({ start: range.from, end: range.to || range.from }).map((day) => (
+              <div key={day.toISOString()}>
+                <h3 className="font-semibold">{format(day, "PPP")}</h3>
+                {timeSlot?.map((item, index) => (
+                  <h2
+                    key={index}
+                    onClick={() =>
+                      !isBlockedTimeSlot(day, item.time) &&
+                      handleTimeSlotClick(day, item.time)
+                    }
+                    className={`py-2 px-4 text-center border rounded-full cursor-pointer 
+                      ${isBlockedTimeSlot(day, item.time) || (item.time === "Todo el Día" && isFullDayDisabled(day)) ? "bg-gray-400 cursor-not-allowed" : "hover:bg-red-600 hover:text-white"} 
+                      ${
+                        selectedTimeSlots.find((item) => item.day === day.toISOString().split("T")[0])?.times.includes(item.time) && "bg-red-600 text-white"
+                      }`}
+                  >
+                    {item.time}
+                  </h2>
+                ))}
+              </div>
             ))}
           </div>
         )}
@@ -191,7 +203,12 @@ const Calendario = () => {
               <strong>Fecha:</strong> {formatDate(range.from, range.to)}
             </p>
             <p className="mt-2">
-              <strong>Horarios seleccionados:</strong> {selectedTimeSlots.join(", ")}
+              <strong>Horarios seleccionados:</strong>{" "}
+              {selectedTimeSlots.map((item) => (
+                <div key={item.day}>
+                  <strong>{format(new Date(item.day), "PPP")}:</strong> {item.times.join(", ")}
+                </div>
+              ))}
             </p>
           </div>
         )}
