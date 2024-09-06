@@ -4,6 +4,7 @@ import { StepperContext } from '@/contexts/StepperContext';
 
 import { Calendar } from "../../../components/ui/calendar"
 import { format, eachDayOfInterval } from 'date-fns';
+import EditConflictForm from '../EditConflictForm';
 
 const Calendario = () => {
   const [numberOfMonths, setNumberOfMonths] = useState(1);
@@ -11,6 +12,10 @@ const Calendario = () => {
   const [timeSlot, setTimeSlot] = useState([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState([]);
   const [blockedTimeSlots, setBlockedTimeSlots] = useState({});
+  const [selectedHours, setSelectedHours] = useState([]);
+  const [conflictDays, setConflictDays] = useState([]);
+  const [editingConflicts, setEditingConflicts] = useState(false);
+const [conflictDetails, setConflictDetails] = useState([]);
 
   const fetchReservations = async () => {
     try {
@@ -82,7 +87,13 @@ const Calendario = () => {
   };
 
   const isBlockedTimeSlot = (day, time) => {
-    const dayString = day?.toISOString().split("T")[0];
+    // console.log(day); // Depuración: verificar qué valor tiene `day`
+  
+    if (!(day instanceof Date) || isNaN(day)) {
+      return false;
+    }
+  
+    const dayString = day.toISOString().split("T")[0];
     return blockedTimeSlots[dayString]?.includes(time);
   };
 
@@ -111,44 +122,69 @@ const Calendario = () => {
 
   const handleDateChange = (newRange) => {
     setRange(newRange);
-    setSelectedTimeSlots([]); // Reiniciar la selección de horarios al cambiar la fecha
+    setSelectedHours([]);
+    setConflictDays([]);
   };
 
-  const handleTimeSlotClick = (day, time) => {
-    const dayString = day.toISOString().split("T")[0];
-    const blockedTimes = blockedTimeSlots[dayString] || [];
+  const handleSelectHours = (hours) => {
+    setSelectedHours(hours);
+    checkForConflicts(hours);
+  };
 
-    if (time === "Todo el Día" && blockedTimes.length > 0) {
-      return;
-    }
+const checkForConflicts = (hours) => {
+  const days = eachDayOfInterval({ start: range.from, end: range.to || range.from });
+  const conflicts = days
+    .filter(day => {
+      const dayString = day.toISOString().split("T")[0];
+      const blockedTimes = blockedTimeSlots[dayString] || [];
+      return hours.some(hour => hour !== "Todo el Día" && blockedTimes.includes(hour));
+    })
+    .map(day => {
+      const dayString = day.toISOString().split("T")[0];
+      const blockedTimes = blockedTimeSlots[dayString] || [];
+      const hasAnyBlockedTime = blockedTimes.length > 0; // Verificar si hay horas bloqueadas
 
-    setSelectedTimeSlots((prevSelected) => {
-      const daySelectedTimes = prevSelected.find((item) => item.day === dayString)?.times || [];
+      return {
+        date: day,
+        editableHours: hours.map(hour => {
+          const isAvailable = !blockedTimes.includes(hour);
 
-      if (time === "Todo el Día") {
-        return [
-          ...prevSelected.filter((item) => item.day !== dayString),
-          { day: dayString, times: ["Todo el Día"] },
-        ];
-      } else {
-        // Alternar la selección de horarios individuales
-        const newSelectedTimes = daySelectedTimes.includes(time)
-          ? daySelectedTimes.filter((t) => t !== time)
-          : [...daySelectedTimes, time];
+          // Si hay alguna hora bloqueada, deshabilitar "Todo el Día"
+          if (hour === "Todo el Día" && hasAnyBlockedTime) {
+            return {
+              time: hour,
+              available: false,
+              selected: false,
+            };
+          }
 
-        if (newSelectedTimes.length === 0) {
-          return prevSelected.filter((item) => item.day !== dayString);
-        } else {
-          return [
-            ...prevSelected.filter((item) => item.day !== dayString),
-            { day: dayString, times: newSelectedTimes },
-          ];
-        }
-      }
+          return {
+            time: hour,
+            available: isAvailable,
+            selected: false,
+          };
+        }),
+      };
     });
-  };
 
-  // Formatear la fecha seleccionada o el rango de fechas
+  console.log("Conflicts generados:", conflicts);
+  setConflictDays(conflicts);
+};
+
+const handleResolveConflicts = () => {
+  setConflictDays(prevDays =>
+    prevDays.map(day => ({
+      ...day,
+      editableHours: timeSlot.map(item => ({
+        time: item.time,
+        available: !isBlockedTimeSlot(day, item.time),
+        selected: selectedHours.includes(item.time)
+      }))
+    }))
+  );
+  setEditingConflicts(true);
+};
+
   const formatDate = (from, to) => {
     if (to) {
       return `${format(new Date(from), "PPP")} hasta ${format(new Date(to), "PPP")}`;
@@ -170,50 +206,67 @@ const Calendario = () => {
       </div>
       <div>
         {range?.from && (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {eachDayOfInterval({ start: range.from, end: range.to || range.from }).map((day) => (
-              <div key={day.toISOString()}>
-                <h3 className="font-semibold">{format(day, "PPP")}</h3>
-                {timeSlot?.map((item, index) => (
+          <>
+            <div className="mt-4">
+              <h2 className="font-semibold">Selecciona los horarios</h2>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {timeSlot.map((item, index) => (
                   <h2
                     key={index}
                     onClick={() =>
-                      !isBlockedTimeSlot(day, item.time) &&
-                      handleTimeSlotClick(day, item.time)
+                      handleSelectHours(
+                        selectedHours.includes(item.time)
+                          ? selectedHours.filter((t) => t !== item.time)
+                          : [...selectedHours, item.time]
+                      )
                     }
                     className={`py-2 px-4 text-center border rounded-full cursor-pointer 
-                      ${isBlockedTimeSlot(day, item.time) || (item.time === "Todo el Día" && isFullDayDisabled(day)) ? "bg-gray-400 cursor-not-allowed" : "hover:bg-red-600 hover:text-white"} 
-                      ${
-                        selectedTimeSlots.find((item) => item.day === day.toISOString().split("T")[0])?.times.includes(item.time) && "bg-red-600 text-white"
-                      }`}
+                      ${selectedHours.includes(item.time) ? "bg-red-600 text-white" : "hover:bg-red-600 hover:text-white"} 
+                      ${isBlockedTimeSlot(range.from, item.time) ? "bg-gray-400 cursor-not-allowed" : ""}`}
                   >
                     {item.time}
                   </h2>
                 ))}
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Sección de detalle de reserva */}
-        {range?.from && selectedTimeSlots.length > 0 && (
-          <div className="mt-8 p-4 border rounded-lg bg-gray-100">
-            <h3 className="text-lg font-semibold">Detalle de la Reserva</h3>
-            <p className="mt-2">
-              <strong>Fecha:</strong> {formatDate(range.from, range.to)}
-            </p>
-            <p className="mt-2">
-              <strong>Horarios seleccionados:</strong>{" "}
-              {selectedTimeSlots.map((item) => (
-                <div key={item.day}>
-                  <strong>{format(new Date(item.day), "PPP")}:</strong> {item.times.join(", ")}
-                </div>
-              ))}
-            </p>
-          </div>
+            </div>
+            {selectedHours.length > 0 && (
+              <div className="mt-8 p-4 border rounded-lg bg-gray-100">
+                <h3 className="text-lg font-semibold">Resumen de la Reserva</h3>
+                <p className="mt-2">
+                  <strong>Fecha:</strong> {formatDate(range.from, range.to)}
+                </p>
+                <p className="mt-2">
+                  <strong>Horarios seleccionados:</strong> {selectedHours.join(", ")}
+                </p>
+              </div>
+            )}
+            {conflictDays.length > 0 && (
+              <div className="mt-8 p-4 border rounded-lg bg-yellow-100">
+                <h3 className="text-lg font-semibold">Advertencia de Conflictos</h3>
+                <p className="mt-2">
+                  Existen conflictos en los siguientes días con las horas seleccionadas:
+                </p>
+                <ul className="mt-2 list-disc pl-5">
+                {conflictDays.map((day, index) => (
+  <li key={index}>
+    {day instanceof Date && !isNaN(day) ? format(day, "PPP") : "Fecha no válida"} - Horarios en conflicto
+  </li>
+))}
+                </ul>
+                <button onClick={handleResolveConflicts} className="mt-4 bg-red-600 text-white py-2 px-4 rounded">
+                  Editar Conflictos
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
-      {console.log(range, selectedTimeSlots)}
+      {editingConflicts && (
+        <EditConflictForm
+          conflictDays={conflictDays}
+          onClose={() => setEditingConflicts(false)}
+        />
+      )}
     </div>
   );
 };
