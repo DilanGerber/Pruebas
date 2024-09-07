@@ -222,13 +222,13 @@ const Calendario = () => {
                         handleSelectHours(item.time)
                       }
                       disabled={isBlocked || isFullDayDisabledFlag}
-                      className={`py-2 px-4 text-center border rounded-full cursor-pointer 
+                      className={`py-2 px-4 text-center border rounded-full 
                         ${selectedHours.includes(item.time)
-                          ? "bg-red-600 text-white"
-                          : "hover:bg-red-600 hover:text-white"} 
+                          ? "bg-red-600 text-white cursor-pointer"
+                          : ""} 
                         ${isBlocked || isFullDayDisabledFlag
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : ""}`}
+                          ? "bg-gray-400 opacity-50 cursor-not-allowed "
+                          : " hover:bg-red-700 hover:text-white  "}`}
                     >
                       {item.time}
                     </button>
