@@ -105,9 +105,9 @@ const Calendario = () => {
   const isFullDayDisabled = (day) => {
     const dayString = day?.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
-  
-    // Bloquear "Todo el Día" solo si todas las horas están bloqueadas
-    return blockedTimes.length === 13; // 13 porque tienes 13 franjas horarias (8AM a 8PM + "Todo el Día")
+    
+    // Bloquear "Todo el Día" solo si ya hay al menos una hora reservada
+    return blockedTimes.length > 0 && !blockedTimes.includes("Todo el Día");
   };
 
   // Handle date change
@@ -246,12 +246,12 @@ const Calendario = () => {
                   className={`py-2 px-4 text-center border rounded-full  ${
                     selectedHours.includes(slot.time)
                       ? "bg-red-600 text-white cursor-pointer"
-                      : isBlockedTimeSlot(range.from, slot.time) || isFullDayDisabled(range.from)
+                      : isBlockedTimeSlot(range.from, slot.time) || (slot.time === "Todo el Día" && isFullDayDisabled(range.from))
                       ? "bg-gray-400 opacity-50 cursor-not-allowed"
                       : "hover:bg-red-700 hover:text-white"
                   } `}
                   onClick={() => handleSelectHours(slot.time)}
-                  disabled={isBlockedTimeSlot(range.from, slot.time) || isFullDayDisabled(range.from)}
+                  disabled={isBlockedTimeSlot(range.from, slot.time) || (slot.time === "Todo el Día" && isFullDayDisabled(range.from))}
                 >
                   {slot.time}
                 </button>
