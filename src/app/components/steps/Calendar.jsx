@@ -96,7 +96,12 @@ const Calendario = () => {
     if (!(day instanceof Date) || isNaN(day)) {
       return false;
     }
-
+  
+    // Cuando se selecciona un rango, todos los horarios están disponibles
+    if (range.from && range.to) {
+      return false;
+    }
+  
     const dayString = day.toISOString().split("T")[0];
     return blockedTimeSlots[dayString]?.includes(time);
   };
@@ -106,8 +111,13 @@ const Calendario = () => {
     const dayString = day?.toISOString().split("T")[0];
     const blockedTimes = blockedTimeSlots[dayString] || [];
     
-    // Bloquear "Todo el Día" solo si ya hay al menos una hora reservada
-    return blockedTimes.length > 0 && !blockedTimes.includes("Todo el Día");
+    // "Todo el Día" solo debe estar deshabilitado si no estamos en un rango
+    if (range.from && range.to) {
+      return false; // Si hay un rango seleccionado, "Todo el Día" debe estar habilitado
+    }
+  
+    // Si hay horas bloqueadas, deshabilitar "Todo el Día"
+    return blockedTimes.includes("Todo el Día") || blockedTimes.length > 0;
   };
 
   // Handle date change
@@ -117,6 +127,14 @@ const Calendario = () => {
     setConflictDays([]);
     setConflictDetails([]);
     setReservationDetails(null); // Reset the reservation details on new range selection
+  
+    // Si se selecciona un rango, permitimos todas las opciones de hora
+    if (newRange?.from && newRange.to) {
+      setTimeSlot((prev) => prev.map(slot => ({
+        ...slot,
+        disabled: false
+      })));
+    }
   };
 
   // Handle hour selection
@@ -141,29 +159,26 @@ const Calendario = () => {
   // Check for conflicts and list conflicting days
   const checkForConflicts = (hours) => {
     if (!range.from) return;
-
-    const days = eachDayOfInterval({
-      start: range.from,
-      end: range.to || range.from,
-    });
+  
+    const days = range.to
+      ? eachDayOfInterval({ start: range.from, end: range.to })
+      : [range.from]; // Solo una fecha si no hay rango
+  
     const conflicts = days.filter((day) => {
       const dayString = day.toISOString().split("T")[0];
       const blockedTimes = blockedTimeSlots[dayString] || [];
-
-      // Caso 1: Si el día está reservado todo el día, cualquier hora genera conflicto
+  
       if (blockedTimes.includes("Todo el Día")) {
         return true;
       }
-
-      // Caso 2: Si se selecciona "Todo el Día" y hay horas reservadas, debe generar conflicto
+  
       if (hours.includes("Todo el Día") && blockedTimes.length > 0) {
         return true;
       }
-
-      // Caso 3: Horas coinciden con alguna hora reservada
+  
       return hours.some((hour) => blockedTimes.includes(hour));
     });
-
+  
     setConflictDays(conflicts);
     setConflictDetails(conflicts.map((day) => format(day, "PPP"))); // Formatear las fechas con conflicto
   };
@@ -243,15 +258,15 @@ const Calendario = () => {
               {timeSlot.map((slot) => (
                 <button
                   key={slot.time}
-                  className={`py-2 px-4 text-center border rounded-full  ${
+                  className={`py-2 px-4 text-center border rounded-full ${
                     selectedHours.includes(slot.time)
                       ? "bg-red-600 text-white cursor-pointer"
-                      : isBlockedTimeSlot(range.from, slot.time) || (slot.time === "Todo el Día" && isFullDayDisabled(range.from))
+                      : (slot.time === "Todo el Día" && isFullDayDisabled(range.from)) || isBlockedTimeSlot(range.from, slot.time)
                       ? "bg-gray-400 opacity-50 cursor-not-allowed"
                       : "hover:bg-red-700 hover:text-white"
-                  } `}
+                  }`}
                   onClick={() => handleSelectHours(slot.time)}
-                  disabled={isBlockedTimeSlot(range.from, slot.time) || (slot.time === "Todo el Día" && isFullDayDisabled(range.from))}
+                  disabled={(slot.time === "Todo el Día" && isFullDayDisabled(range.from)) || isBlockedTimeSlot(range.from, slot.time)}
                 >
                   {slot.time}
                 </button>
@@ -281,7 +296,7 @@ const Calendario = () => {
                   </div>
                 ) : (
                   <button
-                    className="mt-4 py-2 px-4 bg-green-600 text-white rounded-full"
+                    className="mt-4 py-2 px-4 bg-red-600 text-white rounded-full"
                     onClick={handleConfirmReservation}
                   >
                     Confirmar Reserva
