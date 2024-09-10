@@ -29,21 +29,23 @@ const Calendario = () => {
       const timeSlots = data.reduce((acc, reservation) => {
         reservation.dates.forEach(({ date, timeSlots }) => {
           const dateKey = new Date(date).toISOString().split("T")[0];
-
+      
           if (!acc[dateKey]) {
-            acc[dateKey] = [];
+            acc[dateKey] = { blockedTimes: [], editableHours: [] };
           }
-
+      
+          acc[dateKey].editableHours.push(...timeSlots);
+      
           if (timeSlots.includes("Todo el Día")) {
-            acc[dateKey] = ["Todo el Día"];
+            acc[dateKey].blockedTimes = ["Todo el Día"];
           } else {
-            acc[dateKey].push(...timeSlots);
+            acc[dateKey].blockedTimes.push(...timeSlots);
           }
         });
-
+      
         return acc;
       }, {});
-
+      
       setBlockedTimeSlots(timeSlots);
     } catch (error) {
       console.error("Error fetching reservations:", error);
@@ -87,7 +89,7 @@ const Calendario = () => {
   // Check if the day is blocked
   const isBlockedDay = (day) => {
     const dayString = day.toISOString().split("T")[0];
-    const blockedTimes = blockedTimeSlots[dayString] || [];
+    const blockedTimes = blockedTimeSlots[dayString]?.blockedTimes || [];
     return blockedTimes.includes("Todo el Día") || blockedTimes.length >= 13;
   };
 
@@ -97,26 +99,23 @@ const Calendario = () => {
       return false;
     }
   
-    // Cuando se selecciona un rango, todos los horarios están disponibles
     if (range.from && range.to) {
       return false;
     }
   
     const dayString = day.toISOString().split("T")[0];
-    return blockedTimeSlots[dayString]?.includes(time);
+    return blockedTimeSlots[dayString]?.blockedTimes.includes(time);
   };
 
   // Check if "Todo el Día" should be disabled
   const isFullDayDisabled = (day) => {
     const dayString = day?.toISOString().split("T")[0];
-    const blockedTimes = blockedTimeSlots[dayString] || [];
-    
-    // "Todo el Día" solo debe estar deshabilitado si no estamos en un rango
+    const blockedTimes = blockedTimeSlots[dayString]?.blockedTimes || [];
+  
     if (range.from && range.to) {
-      return false; // Si hay un rango seleccionado, "Todo el Día" debe estar habilitado
+      return false;
     }
   
-    // Si hay horas bloqueadas, deshabilitar "Todo el Día"
     return blockedTimes.includes("Todo el Día") || blockedTimes.length > 0;
   };
 
@@ -162,25 +161,35 @@ const Calendario = () => {
   
     const days = range.to
       ? eachDayOfInterval({ start: range.from, end: range.to })
-      : [range.from]; // Solo una fecha si no hay rango
+      : [range.from];
   
-    const conflicts = days.filter((day) => {
+    const conflicts = days.map((day) => {
       const dayString = day.toISOString().split("T")[0];
-      const blockedTimes = blockedTimeSlots[dayString] || [];
+      const blockedTimes = blockedTimeSlots[dayString]?.blockedTimes || [];
   
-      if (blockedTimes.includes("Todo el Día")) {
-        return true;
+      // Verifica si hay conflictos para ese día
+      const hasConflict =
+        blockedTimes.includes("Todo el Día") ||
+        (hours.includes("Todo el Día") && blockedTimes.length > 0) ||
+        hours.some((hour) => blockedTimes.includes(hour));
+  
+      // Si hay conflicto, retorna la fecha y las horas bloqueadas
+      if (hasConflict) {
+        return {
+          date: day,
+          reservedTimes: blockedTimes, // Incluye las horas bloqueadas
+        };
       }
   
-      if (hours.includes("Todo el Día") && blockedTimes.length > 0) {
-        return true;
-      }
+      return null;
+    }).filter(Boolean); // Filtra los nulls (días sin conflicto)
   
-      return hours.some((hour) => blockedTimes.includes(hour));
-    });
-  
+    // Actualiza los estados con los días en conflicto y los detalles de los horarios bloqueados
     setConflictDays(conflicts);
-    setConflictDetails(conflicts.map((day) => format(day, "PPP"))); // Formatear las fechas con conflicto
+    setConflictDetails(conflicts.map((conflict) => ({
+      date: format(conflict.date, "PPP"),
+      reservedTimes: conflict.reservedTimes,
+    })));
   };
 
   // Handle confirming the reservation and building the final data structure
@@ -284,7 +293,7 @@ const Calendario = () => {
                     </p>
                     <ul className="mt-2 text-red-600">
                       {conflictDetails.map((conflict, index) => (
-                        <li key={index}>- {conflict}</li>
+                        <li key={index}>- {conflict.date}</li>
                       ))}
                     </ul>
                     <button
