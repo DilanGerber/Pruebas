@@ -68,7 +68,7 @@ const Modal = () => {
             return (
                 <>
                     <MultiStep steps={steps} currentStep={state.currentStep}/> 
-                    <div className='my-5 sm:my-10 p-5 sm:p-10'>
+                    <div className='my-5 sm:my-10 py-5 sm:py-10'>
                         {displayStep(state.currentStep)}
                     </div>
                     <SteperControl steps={steps} currentStep={state.currentStep} dispatch={dispatch} />

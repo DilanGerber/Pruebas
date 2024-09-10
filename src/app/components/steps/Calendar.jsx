@@ -254,7 +254,7 @@ const Calendario = () => {
         {range?.from && (
           <>
             <h3 className="font-semibold">Seleccione Horas para {formatDate(range.from, range.to)}</h3>
-            <div className="grid grid-cols-3 gap-2 mt-4">
+            <div style={{maxHeight: "300px"}} className="grid grid-cols-1 gap-2 mt-4 overflow-auto">
               {timeSlot.map((slot) => (
                 <button
                   key={slot.time}
@@ -308,8 +308,9 @@ const Calendario = () => {
         )}
       </div>
       {editingConflicts && (
-        <EditConflictForm setEditingConflicts={setEditingConflicts} />
+        <EditConflictForm conflictDays={conflictDays} />
       )}
+      {console.log("aca",conflictDays)}
     </div>
   );
 };
