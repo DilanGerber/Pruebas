@@ -319,7 +319,6 @@ const Calendario = () => {
       {editingConflicts && (
         <EditConflictForm conflictDays={conflictDays} />
       )}
-      {console.log("aca",conflictDays)}
     </div>
   );
 };
