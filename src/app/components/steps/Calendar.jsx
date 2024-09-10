@@ -319,6 +319,7 @@ const Calendario = () => {
       {editingConflicts && (
         <EditConflictForm conflictDays={conflictDays} />
       )}
+      {console.log(reservationDetails)}
     </div>
   );
 };

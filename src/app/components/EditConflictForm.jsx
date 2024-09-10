@@ -2,40 +2,36 @@
 import React, { useState } from "react";
 import { format, isValid } from "date-fns";
 
-// Un array con los posibles horarios (ajústalo a tus necesidades)
-const timeSlots = [
-  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", 
-  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", 
-  "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", 
-  "8:00 PM", 
-];
-
 const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
-  const [updatedConflicts, setUpdatedConflicts] = useState(conflictDays);
+  const [updatedConflicts, setUpdatedConflicts] = useState(
+    conflictDays.map(conflict => ({
+      ...conflict,
+      selectedTimes: conflict.selectedTimes || [] // Inicializamos selectedTimes si no existe
+    }))
+  );
+  
 
-  // Función para manejar el cambio en la selección de horas
-  const handleHourChange = (dayIndex, time) => {
+  // Función para manejar la selección de horarios
+  const handleHourSelection = (dayIndex, hour) => {
     setUpdatedConflicts((prevConflicts) => {
-      const newConflicts = [...prevConflicts];
-      const conflict = newConflicts[dayIndex];
-      if (!conflict.selectedTimes) {
-        conflict.selectedTimes = [];
-      }
-
-      // Alternar la selección de la hora
-      if (conflict.selectedTimes.includes(time)) {
-        conflict.selectedTimes = conflict.selectedTimes.filter(
-          (t) => t !== time
-        );
+      const newConflicts = [...prevConflicts]; // Copia del array de conflictos
+      const selectedDay = { ...newConflicts[dayIndex] }; // Copia del día específico
+      const selectedTimes = new Set(selectedDay.selectedTimes || []); // Usamos un Set para evitar duplicados
+  
+      // Si el horario ya está en el Set, lo eliminamos; si no, lo añadimos
+      if (selectedTimes.has(hour)) {
+        selectedTimes.delete(hour);
       } else {
-        conflict.selectedTimes.push(time);
+        selectedTimes.add(hour);
       }
-
-      return newConflicts;
+  
+      selectedDay.selectedTimes = Array.from(selectedTimes); // Convertimos el Set de nuevo a un array
+      newConflicts[dayIndex] = selectedDay; // Actualizamos el día en el array de conflictos
+  
+      return newConflicts; // Retornamos el array actualizado
     });
   };
 
-  // Función para guardar los cambios
   const handleSave = () => {
     if (onSave) {
       onSave(updatedConflicts);
@@ -43,11 +39,12 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
     onClose();
   };
 
-  // Formatear la fecha para mostrarla
   const formatConflictDate = (conflict) => {
-    if (conflict.date instanceof Date && isValid(conflict.date)) {
-      return format(conflict.date, "PPP");
+    // Si el conflicto es un objeto Date válido, formatearlo
+    if (conflict instanceof Date && isValid(conflict)) {
+      return format(conflict, "PPP");
     }
+    // Si no es una fecha válida, mostrar "Fecha no válida"
     return "Fecha no válida";
   };
 
@@ -55,43 +52,45 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg shadow-lg w-96">
         <h2 className="text-lg font-semibold">Editar Horarios en Conflicto</h2>
-        
-        {/* Mapeamos los días en conflicto */}
         {updatedConflicts?.map((conflict, dayIndex) => (
           <div key={dayIndex} className="mt-4">
             <h3 className="text-md font-semibold">
-              {formatConflictDate(conflict)}
+              {formatConflictDate(conflict.date)}
             </h3>
-            
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {/* Mapeamos los horarios para este día */}
-              {timeSlots.map((time, index) => {
-                // Si el día tiene "Todo el Día" reservado, bloqueamos todos los horarios
-                const isBlockedAllDay = conflict.reservedTimes.includes("Todo el Día");
-                // Verificamos si este horario está reservado
-                const isReserved = conflict.reservedTimes.includes(time);
-
-                return (
-                  <button
-                    key={index}
-                    className={`py-2 px-4 rounded ${
-                      isBlockedAllDay || isReserved
-                        ? "bg-red-500 text-white" // Horario bloqueado
-                        : conflict.selectedTimes?.includes(time)
-                        ? "bg-blue-500 text-white" // Horario seleccionado
-                        : "bg-gray-200 text-black" // Horario disponible
-                    }`}
-                    disabled={isBlockedAllDay || isReserved} // Deshabilitar si está bloqueado
-                    onClick={() => handleHourChange(dayIndex, time)}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
+              {[
+                "8:00 AM",
+                "9:00 AM",
+                "10:00 AM",
+                "11:00 AM",
+                "12:00 PM",
+                "1:00 PM",
+                "2:00 PM",
+                "3:00 PM",
+                "4:00 PM",
+                "5:00 PM",
+                "6:00 PM",
+                "7:00 PM",
+                "8:00 PM",
+              ].map((hour, index) => (
+                <button
+                  key={index}
+                  className={`py-2 px-4 rounded ${
+                    conflict.reservedTimes.includes(hour)
+                      ? "bg-red-500 text-white" // Bloqueado
+                      : conflict.selectedTimes?.includes(hour)
+                      ? "bg-blue-500 text-white" // Seleccionado
+                      : "bg-gray-200 text-black" // Disponible
+                  }`}
+                  disabled={conflict.reservedTimes.includes(hour)} // Deshabilitado si está reservado
+                  onClick={() => handleHourSelection(dayIndex, hour)}
+                >
+                  {hour}
+                </button>
+              ))}
             </div>
           </div>
         ))}
-        
         <div className="mt-4 flex justify-between">
           <button
             onClick={onClose}
@@ -111,4 +110,4 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   );
 };
 
-export default EditConflictForm;
+export default EditConflictForm; 
