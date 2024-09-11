@@ -33,10 +33,18 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   };
 
   const handleSave = () => {
+    // Mapeamos los conflictos actualizados para formatearlos como los espera reservationDetails
+    const updatedDates = updatedConflicts.map((conflict) => ({
+      date: conflict.date, // La fecha no cambia
+      timeSlots: conflict.selectedTimes || [] // Los horarios seleccionados
+    }));
+  
+    // Llamamos a la función onSave que viene del componente padre
     if (onSave) {
-      onSave(updatedConflicts);
+      onSave(updatedDates);
     }
-    onClose();
+  
+    onClose(); // Cerramos el modal
   };
 
   const formatConflictDate = (conflict) => {

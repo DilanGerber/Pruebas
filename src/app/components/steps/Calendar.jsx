@@ -125,7 +125,7 @@ const Calendario = () => {
     setSelectedHours([]);
     setConflictDays([]);
     setConflictDetails([]);
-    setReservationDetails(null); // Reset the reservation details on new range selection
+    setReservationDetails(null); // Resetea los detalles de la reserva al cambiar el rango
   
     // Si se selecciona un rango, permitimos todas las opciones de hora
     if (newRange?.from && newRange.to) {
@@ -133,26 +133,33 @@ const Calendario = () => {
         ...slot,
         disabled: false
       })));
+  
+      // Actualizar reservationDetails con un rango pero sin horas aún
+      updateReservationDetails(newRange, selectedHours);
     }
   };
 
   // Handle hour selection
   const handleSelectHours = (hour) => {
-    // Si se selecciona "Todo el Día", deseleccionar todas las horas anteriores y seleccionar solo "Todo el Día"
+    let updatedHours;
+  
     if (hour === "Todo el Día") {
-      setSelectedHours(["Todo el Día"]);
+      updatedHours = ["Todo el Día"];
     } else {
-      // Si "Todo el Día" está seleccionado, se reemplaza por la nueva selección
-      if (selectedHours.includes("Todo el Día")) {
-        setSelectedHours([hour]);
-      } else {
-        setSelectedHours((prev) =>
-          prev.includes(hour) ? prev.filter((h) => h !== hour) : [...prev, hour]
-        );
-      }
+      updatedHours = selectedHours.includes("Todo el Día")
+        ? [hour]
+        : selectedHours.includes(hour)
+          ? selectedHours.filter((h) => h !== hour)
+          : [...selectedHours, hour];
     }
+  
+    setSelectedHours(updatedHours);
     
-    checkForConflicts([...selectedHours, hour]);
+    // Comprobar conflictos después de seleccionar horas
+    checkForConflicts(updatedHours);
+  
+    // Actualizar reservationDetails cuando se seleccionan horas
+    updateReservationDetails(range, updatedHours);
   };
 
   // Check for conflicts and list conflicting days
@@ -167,13 +174,11 @@ const Calendario = () => {
       const dayString = day.toISOString().split("T")[0];
       const blockedTimes = blockedTimeSlots[dayString]?.blockedTimes || [];
   
-      // Verifica si hay conflictos para ese día
       const hasConflict =
         blockedTimes.includes("Todo el Día") ||
         (hours.includes("Todo el Día") && blockedTimes.length > 0) ||
         hours.some((hour) => blockedTimes.includes(hour));
   
-      // Si hay conflicto, retorna la fecha y las horas bloqueadas
       if (hasConflict) {
         return {
           date: day,
@@ -182,9 +187,8 @@ const Calendario = () => {
       }
   
       return null;
-    }).filter(Boolean); // Filtra los nulls (días sin conflicto)
+    }).filter(Boolean);
   
-    // Actualiza los estados con los días en conflicto y los detalles de los horarios bloqueados
     setConflictDays(conflicts);
     setConflictDetails(conflicts.map((conflict) => ({
       date: format(conflict.date, "PPP"),
@@ -199,22 +203,22 @@ const Calendario = () => {
         start: range.from,
         end: range.to || range.from,
       });
-
+  
       const newReservationData = days.map((day) => ({
         date: day.toISOString(),
         timeSlots: [...selectedHours],
       }));
-
+  
       const reservationPayload = {
         userId: "6667aef2957e2e153ec1bb79", // Hardcoded userId
         officeId: "66ada0c79717df74ab14d493", // Hardcoded officeId
         dates: newReservationData,
       };
-
-      setReservationDetails(reservationPayload); // Guardar la estructura final en el estado
+  
+      setReservationDetails(reservationPayload);
       console.log("Reserva confirmada:", reservationPayload);
-
-      // Aquí puedes hacer el POST request al backend
+  
+      // Enviar la reserva al backend
       // sendReservationToBackend(reservationPayload);
     } else {
       console.error("No se puede confirmar la reserva debido a conflictos.");
@@ -246,6 +250,72 @@ const Calendario = () => {
       window.removeEventListener("resize", updateNumberOfMonths);
     };
   }, []);
+
+  const handleSaveConflicts = (updatedDates) => {
+    setReservationDetails((prevDetails) => {
+      const newDates = prevDetails?.dates ? [...prevDetails.dates] : [];
+  
+      updatedDates.forEach((updatedDate) => {
+        const existingDateIndex = newDates.findIndex(
+          (date) => date.date === updatedDate.date.toISOString()
+        );
+  
+        if (existingDateIndex !== -1) {
+          newDates[existingDateIndex].timeSlots = [
+            ...new Set([
+              ...newDates[existingDateIndex].timeSlots,
+              ...updatedDate.timeSlots,
+            ]),
+          ];
+        } else {
+          newDates.push({
+            date: updatedDate.date.toISOString(),
+            timeSlots: updatedDate.timeSlots,
+          });
+        }
+      });
+  
+      return {
+        ...prevDetails,
+        dates: newDates,
+      };
+    });
+  
+    // Actualizamos los conflictos resueltos
+    setConflictDays((prevConflicts) =>
+      prevConflicts.filter(
+        (conflict) =>
+          !updatedDates.some(
+            (updatedDate) => updatedDate.date.toISOString() === conflict.date
+          )
+      )
+    );
+  
+    // Actualizar reservationDetails nuevamente después de resolver conflictos
+    updateReservationDetails(range, selectedHours);
+  };
+
+  const updateReservationDetails = (range, selectedHours) => {
+    if (range?.from && selectedHours.length > 0 && conflictDays.length === 0) {
+      const days = eachDayOfInterval({
+        start: range.from,
+        end: range.to || range.from,
+      });
+  
+      const newReservationData = days.map((day) => ({
+        date: day.toISOString(),
+        timeSlots: [...selectedHours],
+      }));
+  
+      const reservationPayload = {
+        userId: "6667aef2957e2e153ec1bb79", // Hardcoded userId
+        officeId: "66ada0c79717df74ab14d493", // Hardcoded officeId
+        dates: newReservationData,
+      };
+  
+      setReservationDetails(reservationPayload);
+    }
+  };
 
   return (
     <div className="flex grid-flow-row gap-10">
@@ -317,7 +387,7 @@ const Calendario = () => {
         )}
       </div>
       {editingConflicts && (
-        <EditConflictForm conflictDays={conflictDays} />
+        <EditConflictForm conflictDays={conflictDays} onClose={()=>setEditingConflicts(false)} onSave={handleSaveConflicts} />
       )}
       {console.log(reservationDetails)}
     </div>
