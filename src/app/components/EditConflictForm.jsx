@@ -41,7 +41,7 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   
     // Llamamos a la función onSave que viene del componente padre
     if (onSave) {
-      onSave(updatedDates);
+      onSave(updatedDates); // Aquí pasamos los nuevos horarios seleccionados
     }
   
     onClose(); // Cerramos el modal
