@@ -252,6 +252,7 @@ const Calendario = () => {
   }, []);
 
   const handleSaveConflicts = (updatedDates) => {
+    // Actualizar reservationDetails con los horarios actualizados
     setReservationDetails((prevDetails) => {
       const newDates = prevDetails?.dates ? [...prevDetails.dates] : [];
   
@@ -262,9 +263,7 @@ const Calendario = () => {
   
         if (existingDateIndex !== -1) {
           newDates[existingDateIndex].timeSlots = [
-            ...new Set([
-              ...updatedDate.timeSlots,
-            ]),
+            ...new Set([...updatedDate.timeSlots]),
           ];
         } else {
           newDates.push({
@@ -280,17 +279,19 @@ const Calendario = () => {
       };
     });
   
-    // Actualizamos los conflictos resueltos
+    // Eliminar los días en conflicto resueltos
     setConflictDays((prevConflicts) =>
       prevConflicts.filter(
         (conflict) =>
           !updatedDates.some(
-            (updatedDate) => updatedDate.date.toISOString() === conflict.date
+            (updatedDate) =>
+              new Date(updatedDate.date).toISOString() ===
+              new Date(conflict.date).toISOString()
           )
       )
     );
   
-    // Actualizar reservationDetails nuevamente después de resolver conflictos
+    // Actualizar reservationDetails nuevamente si es necesario
     updateReservationDetails(range, selectedHours);
   };
 
