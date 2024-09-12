@@ -337,11 +337,11 @@ const Calendario = () => {
               {timeSlot.map((slot) => (
                 <button
                   key={slot.time}
-                  className={`py-2 px-4 text-center border rounded-full ${
+                  className={`py-2 px-4 text-center border rounded-full font-medium text-gray-800 ${
                     selectedHours.includes(slot.time)
                       ? "bg-red-600 text-white cursor-pointer"
                       : (slot.time === "Todo el Día" && isFullDayDisabled(range.from)) || isBlockedTimeSlot(range.from, slot.time)
-                      ? "bg-gray-400 opacity-50 cursor-not-allowed"
+                      ? "bg-gray-300 opacity-50 cursor-not-allowed"
                       : "hover:bg-red-700 hover:text-white"
                   }`}
                   onClick={() => handleSelectHours(slot.time)}
@@ -367,7 +367,7 @@ const Calendario = () => {
                       ))}
                     </ul>
                     <button
-                      className="mt-4 py-2 px-4 bg-red-600 text-white rounded-full"
+                      className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
                       onClick={() => setEditingConflicts(true)}
                     >
                       Resolver Conflictos
@@ -375,7 +375,7 @@ const Calendario = () => {
                   </div>
                 ) : (
                   <button
-                    className="mt-4 py-2 px-4 bg-red-600 text-white rounded-full"
+                    className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
                     onClick={handleConfirmReservation}
                   >
                     Confirmar Reserva
