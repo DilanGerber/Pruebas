@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format, isValid } from "date-fns";
 
 const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
@@ -10,6 +10,8 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
       skipDay: false, // Agregamos un nuevo estado para omitir día
     }))
   );
+
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   // Función para manejar la selección de horarios
   const handleHourSelection = (dayIndex, hour) => {
@@ -44,38 +46,41 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   };
 
   const handleSave = () => {
-    // Mapeamos los conflictos actualizados para formatearlos como los espera reservationDetails
     const updatedDates = updatedConflicts.map((conflict) => {
-      // Si el día está omitido, lo manejamos como tal
       if (conflict.skipDay) {
         return {
           date: conflict.date,
-          skip: true, // Aquí indicamos que el día está omitido
+          skip: true,
         };
       } else {
         return {
-          date: conflict.date, // La fecha no cambia
-          timeSlots: conflict.selectedTimes || [], // Los horarios seleccionados
+          date: conflict.date,
+          timeSlots: conflict.selectedTimes || [],
         };
       }
     });
 
-    // Llamamos a la función onSave que viene del componente padre
     if (onSave) {
-      onSave(updatedDates); // Aquí pasamos los nuevos horarios seleccionados y omitidos
+      onSave(updatedDates);
     }
 
-    onClose(); // Cerramos el modal
+    onClose();
   };
 
   const formatConflictDate = (conflict) => {
-    // Si el conflicto es un objeto Date válido, formatearlo
     if (conflict instanceof Date && isValid(conflict)) {
       return format(conflict, "PPP");
     }
-    // Si no es una fecha válida, mostrar "Fecha no válida"
     return "Fecha no válida";
   };
+
+  // Efecto para validar si todas las fechas tienen una opción seleccionada o están omitidas
+  useEffect(() => {
+    const allDaysValid = updatedConflicts.every(
+      (conflict) => conflict.skipDay || conflict.selectedTimes.length > 0
+    );
+    setIsSaveDisabled(!allDaysValid); // Habilita el botón si todos los días son válidos
+  }, [updatedConflicts]);
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
@@ -90,7 +95,7 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
                 {formatConflictDate(conflict.date)}
               </h3>
               <div className="flex flex-col gap-2 mt-2 overflow-auto" style={{ maxHeight: "300px" }}>
-                {/* Agregamos un botón de "Omitir Día" en la lista de opciones */}
+                {/* Botón de "Omitir Día" */}
                 <button
                   className={`py-2 px-4 rounded ${
                     conflict.skipDay
@@ -150,7 +155,12 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
           </button>
           <button
             onClick={handleSave}
-            className="bg-red-600 text-white hover:bg-red-700 py-2 px-4 rounded-xl"
+            disabled={isSaveDisabled}
+            className={`py-2 px-4 rounded-xl text-white font-semibold bg-red-600 ${
+              isSaveDisabled
+                ? " opacity-50 cursor-not-allowed"
+                : " hover:bg-red-700"
+            }`}
           >
             Guardar Cambios
           </button>
