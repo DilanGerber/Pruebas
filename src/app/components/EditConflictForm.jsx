@@ -14,42 +14,30 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   // Función para manejar la selección de horarios
   const handleHourSelection = (dayIndex, hour) => {
     setUpdatedConflicts((prevConflicts) => {
-      const newConflicts = [...prevConflicts]; // Copia del array de conflictos
-      const selectedDay = { ...newConflicts[dayIndex] }; // Copia del día específico
-
-      // Si "Omitir Día" está seleccionado, no se pueden seleccionar horas
+      const newConflicts = [...prevConflicts];
+      const selectedDay = { ...newConflicts[dayIndex] };
+  
       if (selectedDay.skipDay) return newConflicts;
-
-      const selectedTimes = new Set(selectedDay.selectedTimes || []); // Usamos un Set para evitar duplicados
-
-      // Si el horario ya está en el Set, lo eliminamos; si no, lo añadimos
-      if (selectedTimes.has(hour)) {
-        selectedTimes.delete(hour);
-      } else {
-        selectedTimes.add(hour);
-      }
-
-      selectedDay.selectedTimes = Array.from(selectedTimes); // Convertimos el Set de nuevo a un array
-      newConflicts[dayIndex] = selectedDay; // Actualizamos el día en el array de conflictos
-
-      return newConflicts; // Retornamos el array actualizado
+  
+      const selectedTimes = new Set(selectedDay.selectedTimes || []);
+      selectedTimes.has(hour) ? selectedTimes.delete(hour) : selectedTimes.add(hour);
+      selectedDay.selectedTimes = Array.from(selectedTimes);
+      newConflicts[dayIndex] = selectedDay;
+  
+      return newConflicts;
     });
   };
-
-  // Función para omitir un día en conflicto
+  
   const handleSkipDay = (dayIndex) => {
     setUpdatedConflicts((prevConflicts) => {
       const newConflicts = [...prevConflicts];
       const selectedDay = { ...newConflicts[dayIndex] };
-
-      // Alternar el estado de "Omitir Día"
+  
       selectedDay.skipDay = !selectedDay.skipDay;
-
-      // Si se omite el día, se deseleccionan todas las horas
       if (selectedDay.skipDay) {
         selectedDay.selectedTimes = [];
       }
-
+  
       newConflicts[dayIndex] = selectedDay;
       return newConflicts;
     });

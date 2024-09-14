@@ -263,7 +263,7 @@ const Calendario = () => {
   
         if (existingDateIndex !== -1) {
           newDates[existingDateIndex].timeSlots = [
-            ...new Set([...updatedDate.timeSlots]),
+            ...new Set([...updatedDate.timeSlots || []]),
           ];
         } else {
           newDates.push({
