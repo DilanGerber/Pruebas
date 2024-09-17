@@ -328,7 +328,7 @@ const Calendario = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className='flex flex-row justify-between items-start gap-10'>
+      <div className='flex flex-row justify-between items-start gap-2'>
       <div className="flex items-center justify-center">
         <Calendar
           numberOfMonths={numberOfMonths}
@@ -370,31 +370,49 @@ const Calendario = () => {
               <div className="mt-4 border rounded-md p-4">
                 <h3 className="font-semibold">{formatDate(range.from, range.to)}</h3>
                 <p className="mt-2">Horas seleccionadas: {selectedHours.join(", ")}</p>
-                {conflictDays.length > 0 ? (
-                  <div className="mt-4">
-                    <p className="text-red-600">
-                      Conflicto de horario en los días seleccionados. Por favor, resuelva los conflictos antes de continuar.
-                    </p>
-                    <ul className="mt-2 text-red-600">
-                      {conflictDetails.map((conflict, index) => (
-                        <li key={index}>- {conflict.date}</li>
-                      ))}
-                    </ul>
-                    <button
-                      className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                      onClick={() => setEditingConflicts(true)}
-                    >
-                      Resolver Conflictos
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                    onClick={handleConfirmFinishReservation}
-                  >
-                    Confirmar Reserva
-                  </button>
-                )}
+                {
+  conflictDays.length > 0 ? (
+    <div className="mt-4">
+      <p className="text-red-600">
+        Conflicto de horario en los días seleccionados. Por favor, resuelva los conflictos antes de continuar.
+      </p>
+      <ul className="mt-2 text-red-600">
+        {conflictDetails.map((conflict, index) => (
+          <li key={index}>- {conflict.date}</li>
+        ))}
+      </ul>
+      <button
+        className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+        onClick={() => setEditingConflicts(true)}
+      >
+        Resolver Conflictos
+      </button>
+    </div>
+  ) : (
+    <div className="mt-4">
+      {reservationDetails.dates.some(detail => detail.timeSlots.length > 0) ? (
+        <button
+          className="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+          onClick={handleConfirmFinishReservation}
+        >
+          Confirmar Reserva
+        </button>
+      ) : (
+        <>
+          <p className="text-red-600 mb-2">
+            Para continuar, debes seleccionar al menos una fecha con un horario válido.
+          </p>
+          <button
+            className="py-2 px-4 bg-red-600 opacity-50 text-white rounded-xl cursor-not-allowed"
+            disabled
+          >
+            Confirmar Reserva
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
               </div>
             )}
 
