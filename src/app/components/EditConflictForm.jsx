@@ -99,10 +99,9 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-4 rounded-lg shadow-lg w-96">
-        <h2 className="text-lg font-semibold">Editar Horarios en Conflicto</h2>
 
         {/* Botones de navegación */}
-        <div className="mt-4 flex justify-between">
+        <div className="mt-4 flex justify-between items-center">
           <button
             onClick={handlePreviousConflict}
             disabled={currentConflictIndex === 0}
@@ -114,7 +113,7 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
           >
             <LeftConflictDays className=" w-5 h-5" /> 
           </button>
-
+          <h2 className="text-lg font-semibold">Editar Horarios en Conflicto</h2>
           <button
             onClick={handleNextConflict}
             disabled={currentConflictIndex === updatedConflicts.length - 1}

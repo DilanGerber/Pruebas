@@ -126,7 +126,7 @@ const Calendario = () => {
     setConflictDays([]);
     setConflictDetails([]);
     setReservationDetails(null); // Resetea los detalles de la reserva al cambiar el rango
-  
+    setIsReservationConfirmed(false)
     // Si se selecciona un rango, permitimos todas las opciones de hora
     if (newRange?.from && newRange.to) {
       setTimeSlot((prev) => prev.map(slot => ({
@@ -154,7 +154,7 @@ const Calendario = () => {
     }
   
     setSelectedHours(updatedHours);
-    
+    setIsReservationConfirmed(false)
     // Comprobar conflictos después de seleccionar horas
     checkForConflicts(updatedHours);
   
@@ -317,8 +317,18 @@ const Calendario = () => {
     }
   };
 
+  const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
+
+  const handleConfirmFinishReservation = () => {
+    // Aquí puedes realizar cualquier otra lógica adicional (ej. guardar la reserva)
+    
+    // Marcar la reserva como confirmada
+    setIsReservationConfirmed(true);
+  };
+
   return (
-    <div className="flex grid-flow-row gap-10">
+    <div className="flex flex-col gap-2">
+      <div className='flex flex-row justify-between items-start gap-10'>
       <div className="flex items-center justify-center">
         <Calendar
           numberOfMonths={numberOfMonths}
@@ -329,11 +339,11 @@ const Calendario = () => {
           className="rounded-md border"
         />
       </div>
-      <div>
+      <div className='"flex items-center justify-center w-full '>
         {range?.from && (
-          <>
+          <div className='border rounded-md p-4'>
             <h3 className="font-semibold">Seleccione Horas para {formatDate(range.from, range.to)}</h3>
-            <div style={{maxHeight: "300px"}} className="grid grid-cols-1 gap-2 mt-4 overflow-auto">
+            <div style={{maxHeight: "254px"}} className="grid grid-cols-1 gap-2 mt-4 overflow-auto">
               {timeSlot.map((slot) => (
                 <button
                   key={slot.time}
@@ -351,8 +361,12 @@ const Calendario = () => {
                 </button>
               ))}
             </div>
-
-            {selectedHours.length > 0 && (
+          </div>
+        )}
+      </div>
+      </div>
+      <div>
+      {(selectedHours.length > 0 && isReservationConfirmed === false) && (
               <div className="mt-4 border rounded-md p-4">
                 <h3 className="font-semibold">{formatDate(range.from, range.to)}</h3>
                 <p className="mt-2">Horas seleccionadas: {selectedHours.join(", ")}</p>
@@ -376,15 +390,86 @@ const Calendario = () => {
                 ) : (
                   <button
                     className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                    onClick={handleConfirmReservation}
+                    onClick={handleConfirmFinishReservation}
                   >
                     Confirmar Reserva
                   </button>
                 )}
               </div>
             )}
-          </>
+
+             {/* Mostrar los detalles de la reserva solo después de la confirmación */}
+    {isReservationConfirmed && (
+      <div className="mt-4 border rounded-md p-4">
+        <h3 className="font-semibold">Detalles finales de la reserva</h3>
+
+        {/* Mostrar el rango de fechas */}
+        <p className="mt-2">Rango de fechas: {formatDate(range.from, range.to)}</p>
+
+        {/* Mostrar horas seleccionadas */}
+        <p className="mt-2">Horas seleccionadas: {selectedHours.join(", ")}</p>
+
+        {/* Mostrar fechas omitidas (sin selección de horarios) */}
+        {reservationDetails.dates
+          .filter(detail => detail.timeSlots.length === 0)
+          .length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-semibold">Fechas omitidas:</h4>
+            <ul className="mt-2">
+              {reservationDetails.dates
+                .filter(detail => detail.timeSlots.length === 0)
+                .map((detail, index) => (
+                  <li key={index}>- {formatDate(detail.date)}</li>
+                ))}
+            </ul>
+          </div>
         )}
+
+        {/* Mostrar fechas con horarios diferentes */}
+{
+  (() => {
+    if (!reservationDetails.dates.length) return null; // Manejar el caso cuando no hay fechas
+    
+    // Obtener todos los horarios en un array
+    const allTimeSlots = reservationDetails.dates.flatMap(detail => detail.timeSlots);
+    
+    // Contar la frecuencia de cada horario
+    const timeSlotFrequency = allTimeSlots.reduce((acc, slot) => {
+      acc[slot] = (acc[slot] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Encontrar el horario más frecuente
+    const maxFrequency = Math.max(...Object.values(timeSlotFrequency));
+    const mostCommonTimeSlots = Object.keys(timeSlotFrequency).filter(slot => timeSlotFrequency[slot] === maxFrequency);
+    
+    // Filtrar fechas con horarios diferentes de los más comunes
+    const datesWithDifferentTimes = reservationDetails.dates.filter(detail =>
+      detail.timeSlots.length > 0 &&
+      !mostCommonTimeSlots.every(slot => detail.timeSlots.includes(slot))
+    );
+    
+    // Mostrar fechas con horarios diferentes
+    if (datesWithDifferentTimes.length > 0) {
+      return (
+        <div className="mt-4">
+          <h4 className="font-semibold">Fechas con horarios diferentes:</h4>
+          <ul className="mt-2">
+            {datesWithDifferentTimes.map((detail, index) => (
+              <li key={index}>
+                Fecha: {formatDate(detail.date)} - Horarios: {detail.timeSlots.join(", ")}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    
+    return null; // Si no hay fechas con horarios diferentes
+  })()
+}
+      </div>
+    )}
       </div>
       {editingConflicts && (
         <EditConflictForm conflictDays={conflictDays} onClose={()=>setEditingConflicts(false)} onSave={handleSaveConflicts} />
