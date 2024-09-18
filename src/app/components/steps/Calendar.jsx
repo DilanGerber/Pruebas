@@ -10,7 +10,6 @@ const Calendario = () => {
   const [numberOfMonths, setNumberOfMonths] = useState(1);
   const [range, setRange] = useState({ from: null, to: null });
   const [timeSlot, setTimeSlot] = useState([]);
-  const [selectedTimeSlots, setSelectedTimeSlots] = useState([]);
   const [blockedTimeSlots, setBlockedTimeSlots] = useState({});
   const [selectedHours, setSelectedHours] = useState([]);
   const [conflictDays, setConflictDays] = useState([]);
@@ -18,6 +17,7 @@ const Calendario = () => {
   const [conflictDetails, setConflictDetails] = useState([]); // Lista de fechas con conflicto
   const [reservationDetails, setReservationDetails] = useState(null); // Estado para la reserva final
 
+  const { state, dispatch } = useContext(StepperContext);
   // Fetch reservations
   const fetchReservations = async () => {
     try {
@@ -127,6 +127,7 @@ const Calendario = () => {
     setConflictDetails([]);
     setReservationDetails(null); // Resetea los detalles de la reserva al cambiar el rango
     setIsReservationConfirmed(false)
+    dispatch({ type: 'COMPLETE_STEP', step: 'calendar', completed: false });
     // Si se selecciona un rango, permitimos todas las opciones de hora
     if (newRange?.from && newRange.to) {
       setTimeSlot((prev) => prev.map(slot => ({
@@ -155,6 +156,7 @@ const Calendario = () => {
   
     setSelectedHours(updatedHours);
     setIsReservationConfirmed(false)
+    dispatch({ type: 'COMPLETE_STEP', step: 'calendar', completed: false });
     // Comprobar conflictos después de seleccionar horas
     checkForConflicts(updatedHours);
   
@@ -194,35 +196,6 @@ const Calendario = () => {
       date: format(conflict.date, "PPP"),
       reservedTimes: conflict.reservedTimes,
     })));
-  };
-
-  // Handle confirming the reservation and building the final data structure
-  const handleConfirmReservation = () => {
-    if (conflictDays.length === 0 && range.from && selectedHours.length > 0) {
-      const days = eachDayOfInterval({
-        start: range.from,
-        end: range.to || range.from,
-      });
-  
-      const newReservationData = days.map((day) => ({
-        date: day.toISOString(),
-        timeSlots: [...selectedHours],
-      }));
-  
-      const reservationPayload = {
-        userId: "6667aef2957e2e153ec1bb79", // Hardcoded userId
-        officeId: "66ada0c79717df74ab14d493", // Hardcoded officeId
-        dates: newReservationData,
-      };
-  
-      setReservationDetails(reservationPayload);
-      console.log("Reserva confirmada:", reservationPayload);
-  
-      // Enviar la reserva al backend
-      // sendReservationToBackend(reservationPayload);
-    } else {
-      console.error("No se puede confirmar la reserva debido a conflictos.");
-    }
   };
 
   // Format date
@@ -319,11 +292,26 @@ const Calendario = () => {
 
   const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
 
-  const handleConfirmFinishReservation = () => {
-    // Aquí puedes realizar cualquier otra lógica adicional (ej. guardar la reserva)
+  const handleConfirmReservation = () => {
+    // Filtrar las fechas para eliminar aquellas que tengan timeSlots como un array vacío
+  const cleanedDates = reservationDetails.dates.filter(detail => detail.timeSlots.length > 0);
+
+  // Crear una nueva versión de reservationDetails con las fechas filtradas
+  const updatedReservationDetails = {
+    ...reservationDetails,
+    dates: cleanedDates,
+  };
+
+  // Despachar la acción para guardar el estado actualizado
+  dispatch({
+    type: 'SET_CALENDAR_DATA',
+    payload: updatedReservationDetails.dates, // Guardamos las fechas limpias
+  });
+  dispatch({ type: 'SET_OFFICE_ID', payload: updatedReservationDetails.officeId });
     
     // Marcar la reserva como confirmada
     setIsReservationConfirmed(true);
+    dispatch({ type: 'COMPLETE_STEP', step: 'calendar', completed: true });
   };
 
   return (
@@ -393,7 +381,7 @@ const Calendario = () => {
       {reservationDetails.dates.some(detail => detail.timeSlots.length > 0) ? (
         <button
           className="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-          onClick={handleConfirmFinishReservation}
+          onClick={handleConfirmReservation}
         >
           Confirmar Reserva
         </button>
@@ -492,7 +480,6 @@ const Calendario = () => {
       {editingConflicts && (
         <EditConflictForm conflictDays={conflictDays} onClose={()=>setEditingConflicts(false)} onSave={handleSaveConflicts} />
       )}
-      {console.log(reservationDetails)}
     </div>
   );
 };

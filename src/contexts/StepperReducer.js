@@ -1,5 +1,6 @@
 export const initialState = {
-    calendarData: {},
+    dates: [],
+    officeId: "",
     formData: {},
     paymentData: {},
     stepsCompleted: {
@@ -16,7 +17,12 @@ export const stepperReducer = (state = initialState, action) => {
         case 'SET_CALENDAR_DATA':
           return {
             ...state,
-            calendarData: action.payload,
+            dates: action.payload,
+          };
+        case 'SET_OFFICE_ID':
+          return {
+            ...state,
+            officeId: action.payload,  // Actualiza officeId en el estado
           };
         case 'SET_FORM_DATA':
           return {
@@ -33,7 +39,7 @@ export const stepperReducer = (state = initialState, action) => {
             ...state,
             stepsCompleted: {
               ...state.stepsCompleted,
-              [action.step]: true,
+              [action.step]: action.completed,
             },
           };
         case 'SET_CURRENT_STEP':

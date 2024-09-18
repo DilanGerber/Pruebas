@@ -17,7 +17,7 @@ const Form = () => {
         // Verifica si todos los campos del formulario están completos
         const isComplete = Object.values(updatedData).every(field => field !== '');
         if (isComplete) {
-            dispatch({ type: 'COMPLETE_STEP', step: 'form' });
+            dispatch({ type: 'COMPLETE_STEP', step: 'form', completed: true  });
         }
     };
 
