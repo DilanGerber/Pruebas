@@ -3,6 +3,9 @@ export const initialState = {
     officeId: "",
     formData: {},
     paymentData: {},
+    range: { from: null, to: null }, // Nueva propiedad
+    selectedHours: [], // Nueva propiedad
+    isReservationConfirmed: false, // Nueva propiedad
     stepsCompleted: {
         calendar: false,
         form: false,
@@ -34,6 +37,21 @@ export const stepperReducer = (state = initialState, action) => {
             ...state,
             paymentData: action.payload,
           };
+          case 'SET_RANGE':
+            return {
+              ...state,
+              range: action.payload,
+            };
+          case 'SET_SELECTED_HOURS':
+            return {
+              ...state,
+              selectedHours: action.payload,
+            };
+          case 'CONFIRM_RESERVATION':
+            return {
+              ...state,
+              isReservationConfirmed: true,
+            };      
         case 'COMPLETE_STEP':
           return {
             ...state,

@@ -16,8 +16,28 @@ const Calendario = () => {
   const [editingConflicts, setEditingConflicts] = useState(false);
   const [conflictDetails, setConflictDetails] = useState([]); // Lista de fechas con conflicto
   const [reservationDetails, setReservationDetails] = useState(null); // Estado para la reserva final
+  const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
 
   const { state, dispatch } = useContext(StepperContext);
+
+  useEffect(() => {
+    if (state.range) {
+      setRange(state.range);
+    }
+  
+    if (state.selectedHours) {
+      setSelectedHours(state.selectedHours);
+    }
+  
+    if (state.isReservationConfirmed) {
+      setIsReservationConfirmed(state.isReservationConfirmed);
+    }
+  
+    if (state.dates) {
+      setReservationDetails({ dates: state.dates, officeId: state.officeId });
+    }
+  }, [state.range, state.selectedHours, state.isReservationConfirmed, state.dates, state.officeId]);
+  
   // Fetch reservations
   const fetchReservations = async () => {
     try {
@@ -290,8 +310,6 @@ const Calendario = () => {
     }
   };
 
-  const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
-
   const handleConfirmReservation = () => {
     // Filtrar las fechas para eliminar aquellas que tengan timeSlots como un array vacío
   const cleanedDates = reservationDetails.dates.filter(detail => detail.timeSlots.length > 0);
@@ -305,9 +323,16 @@ const Calendario = () => {
   // Despachar la acción para guardar el estado actualizado
   dispatch({
     type: 'SET_CALENDAR_DATA',
-    payload: updatedReservationDetails.dates, // Guardamos las fechas limpias
+    payload: reservationDetails.dates, // Guardamos las fechas limpias
   });
   dispatch({ type: 'SET_OFFICE_ID', payload: updatedReservationDetails.officeId });
+
+  // Despachar las acciones para range y selectedHours
+  dispatch({ type: 'SET_RANGE', payload: range });
+  dispatch({ type: 'SET_SELECTED_HOURS', payload: selectedHours });
+  
+    // Marcar la reserva como confirmada
+    dispatch({ type: 'CONFIRM_RESERVATION' });
     
     // Marcar la reserva como confirmada
     setIsReservationConfirmed(true);
@@ -485,44 +510,3 @@ const Calendario = () => {
 };
 
 export default Calendario;
-
-
-// const { state, dispatch } = useContext(StepperContext);
-// const { calendarData } = state;
-
-// const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     const updatedData = {
-//         ...calendarData,
-//         [name]: value,
-//     };
-
-//     dispatch({ type: 'SET_CALENDAR_DATA', payload: updatedData });
-
-//     // Verifica si todos los campos del formulario están completos
-//     const isComplete = Object.values(updatedData).every(field => field !== '');
-//     if (isComplete) {
-//         dispatch({ type: 'COMPLETE_STEP', step: 'calendar' });
-//     }
-// };
-
-
-
-{/* <div className='flex flex-col'>
-<div className='w-full mx-2 flex-1'>
-    <div className='font-bold h-6 mt-3 text-gray-500 text-xs leading-8 uppercase'>
-        {" "}
-        Username
-    </div>
-    <div className='bg-white my-2 p-1 flex border border-gray-200 rounded'>
-        <input 
-            type="text" 
-            onChange={handleChange}
-            name='username'
-            value={calendarData.username || ""}
-            placeholder='Username'
-            className='p-1 px-2 appearance-none outline-none w-full text-gray-800'
-        />
-    </div>
-</div>
-</div> */}
