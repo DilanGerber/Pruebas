@@ -229,7 +229,7 @@ const Calendario = () => {
   // Responsive calendar
   useEffect(() => {
     const updateNumberOfMonths = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setNumberOfMonths(2);
       } else {
         setNumberOfMonths(1);
@@ -340,8 +340,8 @@ const Calendario = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className='flex flex-row justify-between items-start gap-2'>
+    <div className="flex flex-col gap-2 items-center">
+      <div className='flex md:flex-row flex-col md:justify-between justify-center md:items-start items-center gap-2'>
       <div className="flex items-center justify-center">
         <Calendar
           numberOfMonths={numberOfMonths}
@@ -352,15 +352,15 @@ const Calendario = () => {
           className="rounded-md border"
         />
       </div>
-      <div className='"flex items-center justify-center w-full '>
+      <div className='"flex items-center justify-center w-[250px] md:w-full '>
         {range?.from && (
-          <div className='border rounded-md p-4'>
-            <h3 className="font-semibold">Seleccione Horas para {formatDate(range.from, range.to)}</h3>
-            <div style={{maxHeight: "254px"}} className="grid grid-cols-1 gap-2 mt-4 overflow-auto">
+          <div className='border rounded-md p-4 overflow-auto' style={{maxHeight: "328px"}}>
+            <h3 className="font-semibold text-sm">Seleccione Horas para {formatDate(range.from, range?.to)}</h3>
+            <div  className="grid grid-cols-1 gap-2 mt-4 ">
               {timeSlot.map((slot) => (
                 <button
                   key={slot.time}
-                  className={`py-2 px-4 text-center border rounded-full font-medium text-gray-800 ${
+                  className={` py-1 sm:py-2 px-4 text-center text-sm md:text-base border rounded-full font-medium text-gray-800 ${
                     selectedHours.includes(slot.time)
                       ? "bg-red-600 text-white cursor-pointer"
                       : (slot.time === "Todo el Día" && isFullDayDisabled(range.from)) || isBlockedTimeSlot(range.from, slot.time)
@@ -378,45 +378,45 @@ const Calendario = () => {
         )}
       </div>
       </div>
-      <div>
+      <div className=' w-[250px] md:w-full '>
       {(selectedHours.length > 0 && isReservationConfirmed === false) && (
-              <div className="mt-4 border rounded-md p-4">
-                <h3 className="font-semibold">{formatDate(range.from, range.to)}</h3>
-                <p className="mt-2">Horas seleccionadas: {selectedHours.join(", ")}</p>
+              <div className=" border rounded-md p-4">
+                <h3 className="font-semibold text-sm sm:text-base">{formatDate(range.from, range.to)}</h3>
+                <p className="mt-2 text-xs sm:text-base text-gray-800">Horas seleccionadas: {selectedHours.join(", ")}</p>
                 {
   conflictDays.length > 0 ? (
-    <div className="mt-4">
-      <p className="text-red-600">
+    <div className="mt-2 sm:mt-4">
+      <p className="text-red-600 text-xs sm:text-base ">
         Conflicto de horario en los días seleccionados. Por favor, resuelva los conflictos antes de continuar.
       </p>
-      <ul className="mt-2 text-red-600">
+      <ul className="mt-2 text-red-600 text-xs sm:text-base">
         {conflictDetails.map((conflict, index) => (
           <li key={index}>- {conflict.date}</li>
         ))}
       </ul>
       <button
-        className="mt-4 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+        className="mt-2 sm:mt-4 py-1.5 sm:py-2 px-4 rounded-lg font-semibold  transition duration-200 ease-in-out text-xs sm:text-base shadow-md bg-red-600 hover:bg-red-700 text-white"
         onClick={() => setEditingConflicts(true)}
       >
         Resolver Conflictos
       </button>
     </div>
   ) : (
-    <div className="mt-4">
+    <div className=" mt-2 sm:mt-4">
       {reservationDetails.dates.some(detail => detail.timeSlots.length > 0) ? (
         <button
-          className="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+          className="py-1.5 sm:py-2 px-4 rounded-lg font-semibold  transition duration-200 ease-in-out text-xs sm:text-base shadow-md bg-red-600 hover:bg-red-700 text-white"
           onClick={handleConfirmReservation}
         >
           Confirmar Reserva
         </button>
       ) : (
         <>
-          <p className="text-red-600 mb-2">
+          <p className="text-red-600 mb-2 text-xs sm:text-base">
             Para continuar, debes seleccionar al menos una fecha con un horario válido.
           </p>
           <button
-            className="py-2 px-4 bg-red-600 opacity-50 text-white rounded-xl cursor-not-allowed"
+            className="py-1.5 sm:py-2 px-4 rounded-lg font-semibold  transition duration-200 ease-in-out text-xs sm:text-base shadow-md bg-red-600 opacity-50 text-white cursor-not-allowed"
             disabled
           >
             Confirmar Reserva
@@ -431,22 +431,22 @@ const Calendario = () => {
 
              {/* Mostrar los detalles de la reserva solo después de la confirmación */}
     {isReservationConfirmed && (
-      <div className="mt-4 border rounded-md p-4">
-        <h3 className="font-semibold">Detalles finales de la reserva</h3>
+      <div className=" border rounded-md p-4">
+        <h3 className="font-semibold text-sm sm:text-base">Detalles finales de la reserva</h3>
 
         {/* Mostrar el rango de fechas */}
-        <p className="mt-2">Rango de fechas: {formatDate(range.from, range.to)}</p>
+        <p className="mt-2 text-xs sm:text-base text-gray-800">Rango de fechas: {formatDate(range.from, range.to)}</p>
 
         {/* Mostrar horas seleccionadas */}
-        <p className="mt-2">Horas seleccionadas: {selectedHours.join(", ")}</p>
+        <p className="mt-2 text-xs sm:text-base text-gray-800">Horas seleccionadas: {selectedHours.join(", ")}</p>
 
         {/* Mostrar fechas omitidas (sin selección de horarios) */}
         {reservationDetails.dates
           .filter(detail => detail.timeSlots.length === 0)
           .length > 0 && (
-          <div className="mt-4">
-            <h4 className="font-semibold">Fechas omitidas:</h4>
-            <ul className="mt-2">
+          <div className=" mt-2 sm:mt-4 ">
+            <h4 className="font-semibold text-sm sm:text-base">Fechas omitidas:</h4>
+            <ul className=" mt-1 sm:mt-2 text-xs sm:text-base text-gray-800">
               {reservationDetails.dates
                 .filter(detail => detail.timeSlots.length === 0)
                 .map((detail, index) => (
@@ -483,9 +483,9 @@ const Calendario = () => {
     // Mostrar fechas con horarios diferentes
     if (datesWithDifferentTimes.length > 0) {
       return (
-        <div className="mt-4">
-          <h4 className="font-semibold">Fechas con horarios diferentes:</h4>
-          <ul className="mt-2">
+        <div className="mt-2 sm:mt-4">
+          <h4 className="font-semibold text-sm sm:text-base">Fechas con horarios diferentes:</h4>
+          <ul className=" mt-1 sm:mt-2 text-xs sm:text-base text-gray-800">
             {datesWithDifferentTimes.map((detail, index) => (
               <li key={index}>
                 Fecha: {formatDate(detail.date)} - Horarios: {detail.timeSlots.join(", ")}

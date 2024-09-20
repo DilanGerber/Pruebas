@@ -33,7 +33,7 @@ const SteperControl = ({ steps }) => {
     };
 
     return (
-        <div className='container flex justify-around mt-2 mb-4 sm:mt-4 sm:mb-8'>
+        <div className='container flex justify-around mt-2 mb-2 sm:mt-5 sm:mb-4'>
             <button
                 onClick={handleBackClick}
                 className={`bg-gray-300 text-black  py-1.5 sm:py-2 px-4 rounded-lg font-semibold  transition duration-200 ease-in-out text-xs sm:text-base shadow-md ${

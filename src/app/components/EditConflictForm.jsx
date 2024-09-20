@@ -97,8 +97,8 @@ const EditConflictForm = ({ conflictDays, onClose, onSave }) => {
   const currentConflict = updatedConflicts[currentConflictIndex];
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-10">
+      <div className="bg-white p-4 rounded-lg shadow-lg w-96 z-20 " >
 
         {/* Botones de navegación */}
         <div className="mt-4 flex justify-between items-center">

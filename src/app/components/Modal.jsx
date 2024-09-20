@@ -3,14 +3,13 @@ import React, { useState, useReducer } from 'react'
 import { stepperReducer, initialState } from '@/contexts/StepperReducer'
 import MultiStep from './MultiStep'
 import SteperControl from './SteperControl'
-import Calendar from './steps/Calendar'
+import Calendario from './steps/Calendar'
 import Form from './steps/Form'
 import Payment from './steps/Payment'
 import { StepperContext } from '@/contexts/StepperContext'
 import IconBack from './icons/IconBack'
 import CheckoutSuccess from './uiPayment/CheckoutSuccess'
 import CheckoutError from './uiPayment/CheckoutError'
-import Calendario from './steps/Calendar'
 
 
 const Modal = () => {
@@ -66,13 +65,13 @@ const Modal = () => {
             );
         } else {
             return (
-                <>
+                <div>
                     <MultiStep steps={steps} currentStep={state.currentStep}/> 
-                    <div className='my-5 sm:my-10 py-5 sm:py-10'>
+                    <div  className='my-4 sm:mt-8 '>
                         {displayStep(state.currentStep)}
                     </div>
                     <SteperControl steps={steps} currentStep={state.currentStep} dispatch={dispatch} />
-                </>
+                </div>
             );
         }
     };
@@ -84,13 +83,13 @@ const Modal = () => {
         <button className=' bg-gray-300 py-2 px-8 rounded-xl w-full border border-transparent shadow-sm text-sm sm:text-base font-semibold transition-colors duration-300  text-black hover:bg-gray-400' onClick={() => window.open("https://wa.me/59175888736", "_blank")}>Consultar</button>
         {isOpen && (
             <div className=' fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center'>
-                <div className=' bg-white relative  rounded flex flex-col justify-center items-center gap-4 sm:w-2/3 w-3/4'>
+                <div className=' bg-white relative  rounded flex flex-col items-center gap-4 sm:w-2/3 w-3/4 overflow-auto' style={{maxHeight: "604px"}} >
                     <div className=' absolute top-0 left-0 mt-1 ml-3 sm:mt-2 sm:ml-4'>
                         <IconBack className=" w-6 h-6 sm:w-8 sm:h-8 text-gray-400 hover:text-gray-500" onClick={handlerClose} />
                     </div>
                     <StepperContext.Provider value={{ state, dispatch }}>
-                        <div className=' container mx-auto shadow-lg  rounded-2xl py-2 sm:pt-5 '>
-                            <div className=' container horizontal mt-5'>
+                        <div className=' w-full px-2 mx-auto  rounded-2xl py-2  sm:pt-5 '>
+                            <div className=' horizontal mt-5'>
                                 {displayContent()}
                             </div>
                         </div>
