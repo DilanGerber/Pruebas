@@ -432,7 +432,7 @@ const Calendario = () => {
              {/* Mostrar los detalles de la reserva solo después de la confirmación */}
     {isReservationConfirmed && (
       <div className=" border rounded-md p-4">
-        <h3 className="font-semibold text-sm sm:text-base">Detalles finales de la reserva</h3>
+        <h3 className="font-semibold text-sm sm:text-base">Detalles de la reserva</h3>
 
         {/* Mostrar el rango de fechas */}
         <p className="mt-2 text-xs sm:text-base text-gray-800">Rango de fechas: {formatDate(range.from, range.to)}</p>
