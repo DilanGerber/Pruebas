@@ -67,3 +67,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+html {
+  @apply bg-zinc-900 text-zinc-50;
+}
+
+/* #FAFAFA 
+#D1D1D1
+#929292
+#222222 */
