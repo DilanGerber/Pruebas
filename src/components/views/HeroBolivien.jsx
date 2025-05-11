@@ -1,20 +1,9 @@
-// components/Carousel.tsx
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import LeftConflictDays from '../icons/LeftConflictDays';
 import RightConflictDays from '../icons/RightConflictDays';
 
-const images = ['/5.webp', '/7.webp', '/9.webp', '/10.webp', '/14.webp'];
-const titles = ['Switzerland', 'Finland', 'Iceland', 'Australia', 'Netherlands'];
-const descriptions = [
-  'Paisajes de ensueño y montañas nevadas.',
-  'Auroras boreales y lagos cristalinos.',
-  'Un paraíso natural lleno de volcanes y glaciares.',
-  'Playas, desiertos y ciudades modernas.',
-  'Canales, bicicletas y arquitectura única.',
-];
 const slides = [
   {
     id: 1,
@@ -56,8 +45,10 @@ const slides = [
 
 const Slider = () => {
   const [items, setItems] = useState(slides);
+  const [direction, setDirection] = useState('next');
 
   const handleNext = () => {
+    setDirection('next');
     setItems(prev => {
       const [first, ...rest] = prev;
       return [...rest, first];
@@ -65,6 +56,7 @@ const Slider = () => {
   };
 
   const handlePrev = () => {
+    setDirection('prev');
     setItems(prev => {
       const last = prev[prev.length - 1];
       const rest = prev.slice(0, -1);
@@ -73,61 +65,65 @@ const Slider = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 overflow-hidden">
-      <div className="fixed top-0 left-0 w-full h-full bg-gray-50">
-        <div className="relative w-full h-full overflow-hidden">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="absolute transition-all duration-500 rounded-xl shadow-xl bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${item.image})`,
-                width: index === 1 ? '100%' : '200px',
-                height: index === 1 ? '100%' : '300px',
-                top: index === 1 ? '0' : '50%',
-                left: index === 0 ? 'calc(50% - 440px)' :
-                      index === 1 ? '0' :
-                      index === 2 ? 'calc(50% - 100px)' :
-                      index === 3 ? 'calc(50% + 120px)' :
-                      index === 4 ? 'calc(50% + 340px)' : 
-                      'calc(50% + 560px)',
-                transform: index === 1 ? 'none' : 'translateY(-50%)',
-                borderRadius: index === 1 ? '0' : '20px',
-                opacity: index > 4 ? 0 : 1,
-                zIndex: index === 1 ? 10 : 50
-              }}
-            >
-              <div className={`absolute top-1/2 left-24 w-[300px] text-gray-100 transform -translate-y-1/2 ${
-                index === 1 ? 'visible' : 'hidden'
-              }`}>
-                <h2 className="text-4xl text-white font-bold uppercase mb-2 animate-fadeInUp">
-                  {item.name}
-                </h2>
-                <p className="text-lg text-white mb-4 animate-fadeInUp delay-300">
-                  {item.description}
-                </p>
-                <button className="px-4 py-2 bg-transparent border border-white rounded-lg animate-fadeInUp delay-600">
-                  See More
-                </button>
-              </div>
+    <div className="relative h-screen bg-gray-50 overflow-hidden">
+      <div className="relative w-full h-full">
+        {items.map((item, index) => (
+          <div
+            key={item.id}
+            className={`absolute transition-all duration-500 rounded-xl shadow-xl bg-cover bg-center ${
+              direction === 'prev' && index === 2 ? 'animate-shrinkSlide' : ''
+            }`}
+            style={{
+              backgroundImage: `url(${item.image})`,
+              width: index === 1 ? '100%' : '200px',
+              height: index === 1 ? '100%' : '300px',
+              top: index === 1 ? '0' : '50%',
+              left: index === 1
+                ? '0'
+                : index === 2
+                ? 'calc(100% - 680px)'
+                : index === 3
+                ? 'calc(100% - 460px)'
+                : index === 4
+                ? 'calc(100% - 240px)'
+                : 'calc(100% + 680px)',
+              transform: index === 1 ? 'none' : 'translateY(-50%)',
+              borderRadius: index === 1 ? '0' : '20px',
+              opacity: index > 4 ? 0 : 1,
+              zIndex: index === 1 ? 20 : 50 - index,
+              display: index === 0 ? 'none' : 'block'
+            }}
+          >
+            <div className={`absolute top-1/2 left-24 w-[300px] text-gray-100 transform -translate-y-1/2 ${
+              index === 1 ? 'visible' : 'hidden'
+            }`}>
+              <h2 className="text-4xl text-white font-bold uppercase mb-2 animate-fadeInUp">
+                {item.name}
+              </h2>
+              <p className="text-lg text-white mb-4 animate-fadeInUp delay-300">
+                {item.description}
+              </p>
+              <button className="px-4 py-2 bg-transparent border border-white rounded-lg animate-fadeInUp delay-600">
+                See More
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
-        <div className="absolute bottom-5 w-full text-center space-x-4">
-          <button
-            onClick={handlePrev}
-            className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
-          >
-            <LeftConflictDays className=' size-8 z-30' />
-          </button>
-          <button
-            onClick={handleNext}
-            className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
-          >
-            <RightConflictDays className=' size-8 z-30' />
-          </button>
-        </div>
+      <div className="absolute bottom-5 w-full text-center space-x-4">
+        <button
+          onClick={handlePrev}
+          className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
+        >
+          <LeftConflictDays className="size-8 z-30" />
+        </button>
+        <button
+          onClick={handleNext}
+          className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
+        >
+          <RightConflictDays className="size-8 z-30" />
+        </button>
       </div>
 
       <style jsx global>{`
@@ -143,17 +139,40 @@ const Slider = () => {
             filter: blur(0);
           }
         }
-        
+
         .animate-fadeInUp {
           animation: fadeInUp 1s ease-in-out forwards;
         }
-        
+
         .delay-300 {
           animation-delay: 0.3s;
         }
-        
+
         .delay-600 {
           animation-delay: 0.6s;
+        }
+
+        @keyframes shrinkSlide {
+          from {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform: none;
+            border-radius: 0;
+          }
+          to {
+            width: 200px;
+            height: 300px;
+            top: 50%;
+            left: calc(100% - 680px);
+            transform: translateY(-50%);
+            border-radius: 20px;
+          }
+        }
+
+        .animate-shrinkSlide {
+          animation: shrinkSlide 0.5s ease-in-out forwards;
         }
       `}</style>
     </div>
@@ -166,3 +185,5 @@ export default Slider;
 // import RightConflictDays from '../icons/RightConflictDays';
 {/* <LeftConflictDays />
 <RightConflictDays /> */}
+
+// const images = ['/5.webp', '/7.webp', '/9.webp', '/10.webp', '/14.webp'];
