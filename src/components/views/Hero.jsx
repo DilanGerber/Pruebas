@@ -6,10 +6,10 @@ const Hero = () => {
         <div className=' flex bg-slate-500 w-full h-full'>
             wea
         </div>
-        <div className=' flex bg-slate-500 w-full h-max-[200px]'>
+        <div className=' flex bg-grayLight w-full h-max-[200px]'>
             wea2
         </div>
-        <div className=' bg-slate-500 w-full h-full'>
+        <div className=' bg-gray w-full h-full'>
             wea3
         </div>
         <div className=' bg-slate-500 w-full h-max-[200px]'>
