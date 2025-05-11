@@ -5,9 +5,9 @@ import HeroBolivien from "@/components/views/HeroBolivien";
 export default function Home() {
   return (
     <main className=" ">
-      {/* <Modal /> */}
       {/* <Hero /> */}
       <HeroBolivien />
+      <Modal />
     </main>
   );
 }

@@ -74,34 +74,36 @@ const Slider = () => {
 
   return (
     <div className="min-h-screen bg-gray-200 overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-gray-50 shadow-xl z-50">
-        <div className="relative w-full h-full">
+      <div className="fixed top-0 left-0 w-full h-full bg-gray-50">
+        <div className="relative w-full h-full overflow-hidden">
           {items.map((item, index) => (
             <div
               key={item.id}
-              className="absolute transition-all duration-500 rounded-xl shadow-xl bg-cover bg-center z-50"
+              className="absolute transition-all duration-500 rounded-xl shadow-xl bg-cover bg-center"
               style={{
                 backgroundImage: `url(${item.image})`,
-                width: index <= 1 ? '100%' : '200px',
-                height: index <= 1 ? '100%' : '300px',
-                top: index <= 1 ? '0' : '50%',
-                left: index === 2 ? '50%' : 
-                      index === 3 ? 'calc(50% + 220px)' : 
-                      index === 4 ? 'calc(50% + 440px)' : 
-                      index >= 5 ? 'calc(50% + 660px)' : '0',
-                transform: index <= 1 ? 'translateY(0)' : 'translateY(-50%)',
-                borderRadius: index <= 1 ? '0' : '20px',
-                opacity: index >= 5 ? 0 : 1,
-                zIndex: 10 - index
+                width: index === 1 ? '100%' : '200px',
+                height: index === 1 ? '100%' : '300px',
+                top: index === 1 ? '0' : '50%',
+                left: index === 0 ? 'calc(50% - 440px)' :
+                      index === 1 ? '0' :
+                      index === 2 ? 'calc(50% - 100px)' :
+                      index === 3 ? 'calc(50% + 120px)' :
+                      index === 4 ? 'calc(50% + 340px)' : 
+                      'calc(50% + 560px)',
+                transform: index === 1 ? 'none' : 'translateY(-50%)',
+                borderRadius: index === 1 ? '0' : '20px',
+                opacity: index > 4 ? 0 : 1,
+                zIndex: index === 1 ? 10 : 50
               }}
             >
-              <div className={`absolute top-1/2 left-24 w-[300px] text-gray-100 transform -translate-y-1/2  ${
+              <div className={`absolute top-1/2 left-24 w-[300px] text-gray-100 transform -translate-y-1/2 ${
                 index === 1 ? 'visible' : 'hidden'
               }`}>
-                <h2 className="text-4xl font-bold uppercase mb-2 animate-fadeInUp">
+                <h2 className="text-4xl text-white font-bold uppercase mb-2 animate-fadeInUp">
                   {item.name}
                 </h2>
-                <p className="text-lg mb-4 animate-fadeInUp delay-300">
+                <p className="text-lg text-white mb-4 animate-fadeInUp delay-300">
                   {item.description}
                 </p>
                 <button className="px-4 py-2 bg-transparent border border-white rounded-lg animate-fadeInUp delay-600">
