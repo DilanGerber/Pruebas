@@ -88,7 +88,7 @@ const Slider = () => {
               display: index === 0 ? 'none' : 'block'
             }}
           >
-            <div className={`absolute top-1/2 left-24 w-[300px] text-gray-100 transform -translate-y-1/2 ${
+            <div className={`absolute top-1/2 left-4 md:left-12 lg:left-24 w-[300px] text-gray-100 transform -translate-y-1/2 ${
               index === 1 ? 'visible' : 'hidden'
             }`}>
               <h2 className="text-4xl text-white font-bold uppercase mb-2 animate-fadeInUp">
@@ -97,7 +97,7 @@ const Slider = () => {
               <p className="text-lg text-white mb-4 animate-fadeInUp delay-300">
                 {item.description}
               </p>
-              <button className="px-4 py-2 bg-transparent border border-white rounded-lg animate-fadeInUp delay-600">
+              <button className="px-4 py-2 bg-transparent border border-white text-white rounded-lg animate-fadeInUp delay-600">
                 See More
               </button>
             </div>
@@ -108,13 +108,13 @@ const Slider = () => {
       <div className="absolute bottom-5 w-full text-center space-x-4">
         <button
           onClick={handlePrev}
-          className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
+          className="w-10 h-9 inline-flex items-center justify-center rounded-lg  text-white/90 hover:text-white transition-colors"
         >
           <LeftConflictDays className="size-8 z-30" />
         </button>
         <button
           onClick={handleNext}
-          className="w-10 h-9 inline-flex items-center justify-center rounded-lg border border-black hover:bg-gray-600 hover:text-white transition-colors"
+          className="w-10 h-9 inline-flex items-center justify-center rounded-lg  text-white/90 hover:text-white transition-colors"
         >
           <RightConflictDays className="size-8 z-30" />
         </button>
@@ -159,7 +159,7 @@ const Slider = () => {
             width: 200px;
             height: 300px;
             top: 50%;
-            left: calc(100% - 680px);
+            left: calc(50% - 0px);
             transform: translateY(-50%);
             border-radius: 20px;
           }
