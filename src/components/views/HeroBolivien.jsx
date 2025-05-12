@@ -80,13 +80,7 @@ const Slider = () => {
               top: index === 1 ? '0' : '50%',
               left: index === 1
                 ? '0'
-                : index === 2
-                ? 'calc(100% - 680px)'
-                : index === 3
-                ? 'calc(100% - 460px)'
-                : index === 4
-                ? 'calc(100% - 240px)'
-                : 'calc(100% + 680px)',
+                : `calc(50% + ${(index - 2) * 220}px)`,
               transform: index === 1 ? 'none' : 'translateY(-50%)',
               borderRadius: index === 1 ? '0' : '20px',
               opacity: index > 4 ? 0 : 1,
